@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: viste-site
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: viste-site
+  template:
+    metadata:
+      labels:
+        app: viste-site
+    spec:
+      containers:
+      - name: viste-site
+        image: your-docker-image:latest
+        ports:
+        - containerPort: 5000
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: viste-site-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: yourdomain.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: viste-site-service
+            port:
+              number: 80
