@@ -14,9 +14,23 @@ spec:
     spec:
       containers:
       - name: viste-site
-        image: your-docker-image:latest
+        image: vistee/vlab:vsite
         ports:
         - containerPort: 5000
+      imagePullSecrets:
+      - name: regcred
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: viste-site-service
+spec:
+  selector:
+    app: viste-site
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -24,9 +38,16 @@ metadata:
   name: viste-site-ingress
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/limit-rps: "5"
+    cert-manager.io/issuer: "vlab"
 spec:
+  tls:
+  - hosts:
+    - dev-vlab.ru
+    secretName: vlab-sec
+  ingressClassName: nginx
   rules:
-  - host: yourdomain.com
+  - host: dev-vlab.ru
     http:
       paths:
       - path: /
@@ -35,4 +56,4 @@ spec:
           service:
             name: viste-site-service
             port:
-              number: 80
+              number: 5000
