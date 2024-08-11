@@ -40,6 +40,11 @@ def setup_routes(app):
         posts = BlogPost.query.all()
         return render_template('blog.html', posts=posts)
 
+    @app.route('/blog/<int:post_id>')
+    def view_post(post_id):
+        post = BlogPost.query.get_or_404(post_id)
+        return render_template('view_post.html', post=post)
+
     @app.route('/add_comment/<int:post_id>', methods=['POST'])
     def add_comment(post_id):
         content = request.form['comment']
@@ -47,7 +52,7 @@ def setup_routes(app):
         comment = Comment(content=content, post=post)
         db.session.add(comment)
         db.session.commit()
-        return redirect(url_for('blog'))
+        return redirect(url_for('view_post', post_id=post_id))
 
     @app.route('/login', methods=['GET', 'POST'])
     def login():
