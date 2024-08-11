@@ -12,7 +12,7 @@ class Config:
     SQLALCHEMY_ENGINE_OPTIONS = {"pool_pre_ping": True}
 
     TELEGRAM_BOT_TOKEN = os.getenv('TG_BOT_TOKEN')
-    TELEGRAM_BOT_NAME = 'vlab_auth'
+    TELEGRAM_BOT_NAME = 'dev_vlab_bot'
 
     # VKontakte OAuth configuration
     VK_CLIENT_ID = os.getenv('VK_CLIENT_ID')

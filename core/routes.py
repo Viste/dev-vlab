@@ -12,13 +12,14 @@ from tools.config import Config
 
 oauth = OAuth()
 
+
 def setup_routes(app):
     # Настройка OAuth для VK
     oauth.init_app(app)
     vk = oauth.register(
         name='vk',
-        client_id='YOUR_VK_APP_ID',
-        client_secret='YOUR_VK_SECRET_KEY',
+        client_id=Config.VK_CLIENT_ID,
+        client_secret=Config.VK_CLIENT_SECRET,
         authorize_url='https://oauth.vk.com/authorize',
         authorize_params=None,
         access_token_url='https://oauth.vk.com/access_token',
