@@ -55,6 +55,8 @@ class User(db.Model, UserMixin):
     profile_picture = db.Column(db.String(300), nullable=True)
     email = db.Column(db.String(150), nullable=True, unique=True)
     provider = db.Column(db.String(50), nullable=True)
+    is_admin = db.Column(db.Boolean)
+    is_banned = db.Column(db.Boolean)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -68,7 +70,7 @@ class User(db.Model, UserMixin):
 
     @staticmethod
     def verify_reset_token(token):
-        s = Serializer(app.config['SECRET_KEY'])
+        s = Serializer(Config.SECRET_KEY)
         try:
             user_id = s.loads(token)['user_id']
         except:

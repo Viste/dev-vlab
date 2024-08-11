@@ -38,14 +38,15 @@ def setup_routes(app):
     @app.route('/blog')
     def blog():
         posts = BlogPost.query.all()
-        return render_template('blog.html', posts=posts)
+        return render_template('blog/blog.html', posts=posts)
 
     @app.route('/blog/<int:post_id>')
     def view_post(post_id):
         post = BlogPost.query.get_or_404(post_id)
-        return render_template('view_post.html', post=post)
+        return render_template('blog/view_post.html', post=post)
 
     @app.route('/add_comment/<int:post_id>', methods=['POST'])
+    @login_required
     def add_comment(post_id):
         content = request.form['comment']
         post = BlogPost.query.get_or_404(post_id)
@@ -66,7 +67,7 @@ def setup_routes(app):
                 return redirect(next_page) if next_page else redirect(url_for('index'))
             else:
                 flash('Login Unsuccessful. Please check username and password', 'danger')
-        return render_template('login.html')
+        return render_template('auth/login.html')
 
     @app.route('/login/vk')
     def login_vk():
@@ -179,7 +180,7 @@ def setup_routes(app):
             db.session.commit()
             login_user(new_user)
             return redirect(url_for('index'))
-        return render_template('register.html')
+        return render_template('auth/register.html')
 
     @app.route('/reset_password', methods=['GET', 'POST'])
     def reset_password():
@@ -191,7 +192,7 @@ def setup_routes(app):
                 return redirect(url_for('reset_password'))
             reset_token = user.get_reset_token()
             return redirect(url_for('reset_password_token', token=reset_token))
-        return render_template('reset_password.html')
+        return render_template('auth/change_password.html')
 
     @app.route('/reset_password/<token>', methods=['GET', 'POST'])
     def reset_password_token(token):
@@ -205,7 +206,7 @@ def setup_routes(app):
             db.session.commit()
             flash('Your password has been updated!', 'success')
             return redirect(url_for('login'))
-        return render_template('reset_password_token.html')
+        return render_template('auth/reset_password_token.html')
 
     @app.route('/logout')
     @login_required

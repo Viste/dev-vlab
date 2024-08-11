@@ -1,12 +1,11 @@
+import flask_admin as admin
 from flask import redirect, url_for, request
-from flask_admin import Admin
-from flask_admin import AdminIndexView, expose
+from flask_admin import AdminIndexView
 from flask_admin.contrib.sqla import ModelView
-from flask_login import LoginManager, current_user
+from flask_login import login_user, logout_user, current_user, login_required
 
-from database.models import User, BlogPost, Project, NavigationLink
-
-login_manager = LoginManager()
+from database.models import BlogPost, Project, NavigationLink
+from tools.forms import LoginForm
 
 
 class MyModelView(ModelView):
@@ -18,21 +17,35 @@ class MyModelView(ModelView):
 
 
 class MyAdminIndexView(AdminIndexView):
-    @expose('/')
+    @admin.expose('/')
+    @login_required
     def index(self):
         if not current_user.is_authenticated:
-            return redirect(url_for('login'))
+            return redirect(url_for('admin.login_view'))
         return super(MyAdminIndexView, self).index()
 
+    @admin.expose('/login/', methods=('GET', 'POST'))
+    def login_view(self):
+        form = LoginForm(request.form)
+        if admin.helpers.validate_form_on_submit(form):
+            user = form.get_user()
+            login_user(user)
 
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
+        if current_user.is_authenticated:
+            return redirect(url_for('admin.index'))
+        self._template_args['form'] = form
+        return super(MyAdminIndexView, self).render('admin/login.html')
+
+    @admin.expose('/logout/')
+    def logout_view(self):
+        logout_user()
+        session.clear()
+        return redirect(url_for('admin.login_view'))
 
 
 def setup_admin(app, db):
-    admin = Admin(app, name='Admin Panel', template_mode='bootstrap4', index_view=MyAdminIndexView())
-    admin.add_view(MyModelView(BlogPost, db.session))
-    admin.add_view(MyModelView(Project, db.session))
-    admin.add_view(MyModelView(NavigationLink, db.session))
+    admins = admin.Admin(app, name='Admin Panel', template_mode='bootstrap4', index_view=MyAdminIndexView())
+    admins.add_view(MyModelView(BlogPost, db.session))
+    admins.add_view(MyModelView(Project, db.session))
+    admins.add_view(MyModelView(NavigationLink, db.session))
     return admin

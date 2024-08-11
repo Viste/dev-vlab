@@ -1,0 +1,13 @@
+{% extends 'index.html' %}
+
+{% block content %}
+<h2>Смена Email</h2>
+<form method="POST" action="{{ url_for('change_email') }}">
+    {{ form.hidden_tag() }}
+    <p>
+        {{ form.new_email.label }}<br>
+        {{ form.new_email(size=32) }}
+    </p>
+    <p>{{ form.submit() }}</p>
+</form>
+{% endblock %}

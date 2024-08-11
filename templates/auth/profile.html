@@ -1,0 +1,64 @@
+{% extends 'index.html' %}
+
+{% block content %}
+<div class="profile-page">
+    <h1 class="page-title">Профиль</h1>
+    <div class="profile-section">
+        <img src="{{ account.avatar_url or url_for('static', filename='images/default_avatar.png') }}" alt="avatar" width="150" height="150">
+        <div class="detail-item">Логин: {{ account.username }}</div>
+        <div class="detail-item">Почта: {{ account.email }}</div>
+        <div class="detail-item">Город: {{ account.city or 'Не указан' }}</div>
+        <div class="detail-item">Наушники: {{ account.headphones or 'Не указаны' }}</div>
+        <div class="detail-item">Звуковая карта: {{ account.sound_card or 'Не указана' }}</div>
+        <div class="detail-item">Сэтап ПК: {{ account.pc_setup or 'Не указан' }}</div>
+        <a href="{{ url_for('views.edit_profile') }}" class="button">Редактировать профиль</a>
+        <a href="{{ url_for('views.change_password') }}" class="button">Сменить пароль</a>
+        <a href="{{ url_for('views.change_email') }}" class="button">Сменить почту</a>
+    </div>
+    <div class="profile-section">
+        <h3>Доступные Курсы</h3>
+        {% for course in courses %}
+        <div>
+            <a class="course-button" href="{{ url_for('views.course_detail', course_id=course.id) }}">{{ course.name }}</a>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="profile-section">
+        <h3>Сделанные домашние задания</h3>
+        {% for submission in submissions %}
+        <div>
+            <div class="detail-item">Курс: {{ submission.homework.title }} ({{ submission.homework.course.name }})</div>
+            <div class="detail-item">Оценка: <span class="star-rating">{% for i in range(submission.grade) %}★{% endfor %}</span></div>
+            <div class="detail-item">Комментарий: {{ submission.comments }}</div>
+        </div>
+        {% endfor %}
+    </div>
+    <!-- Демо-записи -->
+    <div class="profile-section">
+        <h3>Демо-записи</h3>
+        {% for demo in demo_submissions %}
+        <div>
+           <strong>{{ demo.course.demo_setting.title }}</strong>: {{ demo.demo_name }} - Оценка: {{ demo.grade }}
+       </div>
+       {% endfor %}
+    </div>
+    <div class="profile-section">
+        <h3>Ваши достижения</h3>
+        {% for achievement in achievements %}
+            <div class="detail-item">Звание: {{ achievement.title }}</div>
+            <div class="detail-item">Описание: {{ achievement.description }}</div>
+        {% else %}
+            <div class="detail-item">Звание: Нет достижений</div>
+        {% endfor %}
+    </div>
+    <div class="profile-section">
+    <h3>История покупок</h3>
+    {% for purchase in purchases %}
+        <div>
+            <div class="detail-item">Товар: {{ purchase.item_name }}</div>
+            <div class="detail-item"><a href="{{ url_for('views.download_product', product_id=purchase.id) }}">Скачать</a></div>
+        </div>
+    {% endfor %}
+   </div>
+</div>
+{% endblock %}
