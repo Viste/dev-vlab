@@ -107,12 +107,28 @@
 
     <div class="container mt-5 pt-5">
         {% block content %}
+        <h1>Привет, я {{ nick }}</h1>
+        <p>Разрабатываю всякое, вот такие есть проекты:</p>
+        <div class="row">
+            {% for project in projects %}
+            <div class="col-md-4">
+                <div class="card mb-4 shadow-sm">
+                    <a href="{{ project.url }}" target="_blank">
+                        <img src="{{ project.image_url }}" class="card-img-top" alt="{{ project.name }}">
+                    </a>
+                    <div class="card-body">
+                        <p class="card-text">{{ project.name }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
         {% endblock %}
     </div>
 
     <footer class="mt-5 text-center text-muted">
         <div class="container">
-            © 2024 <a href="https://dev-vlab.ru/" target="_blank" class="text-muted">pprfnk.tech</a>
+            © 2024 <a href="https://dev-vlab.ru/" target="_blank" class="text-muted">dev-vlab.ru</a>
         </div>
     </footer>
 

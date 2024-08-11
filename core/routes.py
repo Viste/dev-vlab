@@ -5,7 +5,7 @@ import time
 
 from authlib.integrations.flask_client import OAuth
 from flask import render_template, redirect, url_for, request, flash, jsonify
-from flask_login import login_user, logout_user, login_required
+from flask_login import login_user, logout_user, login_required, current_user
 
 from database.models import db, Project, BlogPost, NavigationLink, User, Comment
 from tools.config import Config
@@ -34,6 +34,11 @@ def setup_routes(app):
         projects = Project.query.all()
         links = NavigationLink.query.all()
         return render_template('index.html', nick="Viste", projects=projects, links=links)
+
+    @app.route('/profile')
+    @login_required
+    def profile():
+        return render_template('profile.html', user=current_user)
 
     @app.route('/blog')
     def blog():
@@ -72,7 +77,7 @@ def setup_routes(app):
     @app.route('/login/vk')
     def login_vk():
         redirect_uri = url_for('authorize_vk', _external=True)
-        return vk.authorize_redirect(redirect_uri)
+        vk.authorize_redirect(redirect_uri)
 
     @app.route('/vk/callback')
     def authorize_vk():
