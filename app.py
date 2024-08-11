@@ -29,7 +29,8 @@ csp = {
     'default-src': [
         '\'self\'',
         'https://code.jquery.com',
-        'https://cdn.jsdelivr.net'
+        'https://cdn.jsdelivr.net',
+        'https://i.pinimg.com'
     ]
 }
 # HTTP Strict Transport Security (HSTS) Header
