@@ -10,3 +10,11 @@ class Config:
     SQLALCHEMY_POOL_RECYCLE = 1800
     SQLALCHEMY_MAX_OVERFLOW = 5
     SQLALCHEMY_ENGINE_OPTIONS = {"pool_pre_ping": True}
+
+    TELEGRAM_BOT_TOKEN = os.getenv('TG_BOT_TOKEN')
+    TELEGRAM_BOT_NAME = 'vlab_auth'
+
+    # VKontakte OAuth configuration
+    VK_CLIENT_ID = os.getenv('VK_CLIENT_ID')
+    VK_CLIENT_SECRET = os.getenv('VK_CLIENT_SECRET')
+    VK_REDIRECT_URI = os.getenv('VK_REDIRECT_URI', 'http://localhost:5000/vk/authorize')

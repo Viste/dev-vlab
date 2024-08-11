@@ -20,3 +20,6 @@ flask-talisman
 mutagen
 markdown
 python-dotenv
+Authlib
+Flask-OAuthlib
+requests-oauthlib

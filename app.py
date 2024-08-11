@@ -1,15 +1,13 @@
+from dotenv import load_dotenv
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask_admin import Admin
 from flask_talisman import Talisman
-from database.models import db
+from werkzeug.middleware.proxy_fix import ProxyFix
+
 from core.admin import setup_admin
 from core.routes import setup_routes
-from werkzeug.middleware.proxy_fix import ProxyFix
-from dotenv import load_dotenv
+from database.models import db
 from tools.config import Config
-import os
 
 load_dotenv()
 
@@ -19,9 +17,7 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1)
 app.config.from_object(Config)
 db.init_app(app)
 migrate = Migrate(app, db)
-
-admin = Admin(app, name='Admin Panel', template_mode='bootstrap4')
-setup_admin(admin, db)
+setup_admin(app, db)
 setup_routes(app)
 
 # Content Security Policy (CSP) Header
@@ -30,7 +26,9 @@ csp = {
         '\'self\'',
         'https://code.jquery.com',
         'https://cdn.jsdelivr.net',
-        'https://i.pinimg.com'
+        'https://i.pinimg.com',
+        'https://oauth.telegram.org',
+        'https://oauth.vk.com'
     ]
 }
 # HTTP Strict Transport Security (HSTS) Header
