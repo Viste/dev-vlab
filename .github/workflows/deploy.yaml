@@ -1,4 +1,4 @@
-name: deploy cyberpaper
+name: deploy site
 
 on:
   push:
