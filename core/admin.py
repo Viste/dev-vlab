@@ -1,5 +1,5 @@
 import flask_admin as admin
-from flask import redirect, url_for, request
+from flask import redirect, url_for, request, session
 from flask_admin import AdminIndexView
 from flask_admin.contrib.sqla import ModelView
 from flask_login import login_user, logout_user, current_user, login_required

@@ -13,7 +13,7 @@ def load_user(user_id):
 
 
 def authenticate_user(username, password):
-    user = Customer.query.filter_by(username=username).first()
+    user = User.query.filter_by(username=username).first()
     if user and check_password_hash(user.password, password):
         session['loggedin'] = True
         session['id'] = user.id
