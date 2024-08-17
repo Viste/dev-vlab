@@ -7,6 +7,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from core.admin import setup_admin
 from core.routes import setup_routes
 from database.models import db
+from tools.auth import login_manager
 from tools.config import Config
 
 load_dotenv()
@@ -17,8 +18,12 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1)
 app.config.from_object(Config)
 db.init_app(app)
 migrate = Migrate(app, db)
-setup_admin(app, db)
+
+
+login_manager.init_app(app)
+login_manager.login_view = 'login'
 setup_routes(app)
+setup_admin(app, db)
 
 # Content Security Policy (CSP) Header
 csp = {
