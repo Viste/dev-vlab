@@ -23,9 +23,6 @@ class LoginForm(form.Form):
         if user.is_admin is False:
             raise validators.ValidationError('Вы не администратор')
 
-        if user.is_moderator is False:
-            raise validators.ValidationError('Вы не модератор')
-
     def get_user(self):
         return db.session.query(User).filter_by(username=self.login.data).first()
 
