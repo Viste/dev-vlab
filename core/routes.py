@@ -3,6 +3,7 @@ from flask import render_template, redirect, url_for, request, flash, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
 
 from database.models import db, Project, BlogPost, NavigationLink, User, Comment
+from tools.auth import authenticate_vk_user, authenticate_user
 from tools.config import Config
 
 oauth = OAuth()
@@ -56,13 +57,13 @@ def setup_routes(app):
         if request.method == 'POST':
             username = request.form['username']
             password = request.form['password']
-            user = User.query.filter_by(username=username).first()
-            if user and user.check_password(password):
-                login_user(user)
+
+            if authenticate_user(username, password):
                 next_page = request.args.get('next')
                 return redirect(next_page) if next_page else redirect(url_for('index'))
             else:
                 flash('Login Unsuccessful. Please check username and password', 'danger')
+
         return render_template('auth/login.html')
 
     @app.route('/update_telegram_profile', methods=['POST'])
@@ -139,6 +140,10 @@ def setup_routes(app):
     def authorize_vk():
         try:
             token = vk.authorize_access_token()
+            if token is None:
+                flash('Failed to retrieve token from VK', 'danger')
+                return redirect(url_for('login'))
+
             resp = vk.get(
                 'https://api.vk.com/method/users.get',
                 token=token,
@@ -147,7 +152,11 @@ def setup_routes(app):
                     'fields': 'id,first_name,last_name,screen_name,photo_100,email'
                 }
             )
-            profile = resp.json()['response'][0]
+
+            profile = resp.json().get('response', [])[0]
+            if profile is None:
+                flash('Failed to retrieve user profile from VK', 'danger')
+                return redirect(url_for('login'))
 
             vk_id = profile['id']
             first_name = profile['first_name']
@@ -156,15 +165,13 @@ def setup_routes(app):
             profile_picture = profile.get('photo_100', '')
             email = token.get('email')
 
-            user = User.query.filter_by(vk_id=vk_id).first()
-            if not user:
-                user = User(username=screen_name, vk_id=vk_id, first_name=first_name, last_name=last_name,
-                            profile_picture=profile_picture, email=email, provider='vk')
-                db.session.add(user)
-                db.session.commit()
-            login_user(user)
+            authenticate_vk_user(vk_id, screen_name, first_name, last_name, profile_picture, email)
+
+            flash(f'Successfully logged in as {screen_name}', 'success')
             return redirect(url_for('index'))
+
         except Exception as e:
+            print(f'Error during VK authorization: {e}')  # Логирование ошибки
             flash('Authorization failed. Please try again.', 'danger')
             return redirect(url_for('login'))
 

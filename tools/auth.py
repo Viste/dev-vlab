@@ -3,6 +3,7 @@ from flask_login import LoginManager, login_user, logout_user
 from werkzeug.security import check_password_hash
 
 from database.models import User
+from database.models import db
 
 login_manager = LoginManager()
 
@@ -23,5 +24,20 @@ def authenticate_user(username, password):
     return False
 
 
+def authenticate_vk_user(vk_id, screen_name, first_name, last_name, profile_picture, email):
+    user = User.query.filter_by(vk_id=vk_id).first()
+    if not user:
+        user = User(username=screen_name, vk_id=vk_id, first_name=first_name, last_name=last_name,
+                    profile_picture=profile_picture, email=email, provider='vk')
+        db.session.add(user)
+        db.session.commit()
+    session['loggedin'] = True
+    session['id'] = user.id
+    session['username'] = user.username
+    login_user(user)
+    return True
+
+
 def logout():
     logout_user()
+    session.clear()
