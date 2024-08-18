@@ -17,7 +17,6 @@ def setup_routes(app):
         client_secret=Config.VK_CLIENT_SECRET,
         authorize_url='https://oauth.vk.com/authorize',
         access_token_url='https://oauth.vk.com/access_token',
-        redirect_uri=url_for('authorize_vk', _external=True),
         client_kwargs={'scope': 'email'}
     )
 
