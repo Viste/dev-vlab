@@ -8,6 +8,9 @@ from tools.config import Config
 
 oauth = OAuth()
 
+print(f'VK_CLIENT_ID: {Config.VK_CLIENT_ID}')
+print(f'VK_CLIENT_SECRET: {Config.VK_CLIENT_SECRET}')
+
 
 def setup_routes(app):
     # Настройка OAuth для VK
