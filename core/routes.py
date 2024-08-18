@@ -1,5 +1,5 @@
 from authlib.integrations.flask_client import OAuth
-from flask import render_template, redirect, url_for, request, flash
+from flask import render_template, redirect, url_for, request, flash, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
 
 from database.models import db, Project, BlogPost, NavigationLink, User, Comment
@@ -64,6 +64,71 @@ def setup_routes(app):
             else:
                 flash('Login Unsuccessful. Please check username and password', 'danger')
         return render_template('auth/login.html')
+
+    @app.route('/update_telegram_profile', methods=['POST'])
+    def update_telegram_profile():
+        data = request.json
+        telegram_id = data.get('telegram_id')
+        username = data.get('username')
+        first_name = data.get('first_name')
+        last_name = data.get('last_name')
+        profile_picture = data.get('profile_picture')
+
+        user = User.query.filter_by(telegram_id=telegram_id).first()
+        if user:
+            user.username = username
+            user.first_name = first_name
+            user.last_name = last_name
+            user.profile_picture = profile_picture
+        else:
+            user = User(telegram_id=telegram_id, username=username, first_name=first_name, last_name=last_name, profile_picture=profile_picture, provider='telegram')
+            db.session.add(user)
+
+        db.session.commit()
+        return jsonify({"status": "success"}), 200
+
+    @app.route('/register', methods=['GET', 'POST'])
+    def register():
+        if request.method == 'POST':
+            username = request.form['username']
+            password = request.form['password']
+            user = User.query.filter_by(username=username).first()
+            if user:
+                flash('Username already exists.', 'danger')
+                return redirect(url_for('register'))
+            new_user = User(username=username)
+            new_user.set_password(password)
+            db.session.add(new_user)
+            db.session.commit()
+            login_user(new_user)
+            return redirect(url_for('index'))
+        return render_template('auth/register.html')
+
+    @app.route('/reset_password', methods=['GET', 'POST'])
+    def reset_password():
+        if request.method == 'POST':
+            username = request.form['username']
+            user = User.query.filter_by(username=username).first()
+            if not user:
+                flash('No account found with that username.', 'danger')
+                return redirect(url_for('reset_password'))
+            reset_token = user.get_reset_token()
+            return redirect(url_for('reset_password_token', token=reset_token))
+        return render_template('auth/change_password.html')
+
+    @app.route('/reset_password/<token>', methods=['GET', 'POST'])
+    def reset_password_token(token):
+        user = User.verify_reset_token(token)
+        if not user:
+            flash('Invalid or expired token', 'danger')
+            return redirect(url_for('reset_password'))
+        if request.method == 'POST':
+            password = request.form['password']
+            user.set_password(password)
+            db.session.commit()
+            flash('Your password has been updated!', 'success')
+            return redirect(url_for('login'))
+        return render_template('auth/reset_password_token.html')
 
     @app.route('/login/vk')
     def login_vk():
