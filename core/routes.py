@@ -143,15 +143,17 @@ def setup_routes(app):
     def authorize_vk():
         try:
             token = vk.authorize_access_token()
-            if token is None:
-                flash('Failed to retrieve token from VK', 'danger')
+            access_token = token.get('access_token')
+            if not access_token:
+                flash('Failed to retrieve access token from VK', 'danger')
                 return redirect(url_for('login'))
+
+            print(f'Token received: {token}')
 
             resp = vk.get(
                 'https://api.vk.com/method/users.get',
-                token=token,
+                token={'access_token': access_token, 'v': '5.131'},
                 params={
-                    'v': '5.131',
                     'fields': 'id,first_name,last_name,screen_name,photo_100,email'
                 }
             )
@@ -177,6 +179,7 @@ def setup_routes(app):
             print(f'Error during VK authorization: {e}')  # Логирование ошибки
             flash('Authorization failed. Please try again.', 'danger')
             return redirect(url_for('login'))
+
 
     @app.route('/logout')
     @login_required
