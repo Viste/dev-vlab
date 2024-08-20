@@ -1,4 +1,3 @@
-from authlib.integrations.flask_client import OAuth
 from flask import render_template, redirect, url_for, request, flash, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
 
@@ -6,9 +5,8 @@ from database.models import db, Project, BlogPost, NavigationLink, User, Comment
 from tools.auth import authenticate_vk_user, authenticate_user
 from tools.config import Config
 
-oauth = OAuth()
 
-def setup_routes(app):
+def setup_routes(app, oauth):
     oauth.init_app(app)
     vk = oauth.register(
         name='vk',

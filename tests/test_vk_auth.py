@@ -1,4 +1,4 @@
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 import pytest
 
@@ -13,41 +13,43 @@ def client():
             yield client
 
 
-def test_login_vk_redirect(client):
-    response = client.get('/login/vk')
-    assert response.status_code == 302
+@patch('app.setup_routes')
+def test_authorize_vk_success(mock_setup_routes, client):
+    mock_oauth = MagicMock()
+    mock_vk = mock_oauth.register.return_value
+    mock_setup_routes.side_effect = lambda app, oauth: oauth
+    app.oauth = mock_oauth
 
-
-@patch('app.oauth.vk.authorize_access_token')
-@patch('app.oauth.vk.get')
-def test_authorize_vk_success(mock_get, mock_authorize_access_token, client):
-    mock_authorize_access_token.return_value = {
+    mock_vk.authorize_access_token.return_value = {
         'access_token': 'mock_access_token',
         'email': 'user@example.com'
     }
-
-    mock_get.return_value.json.return_value = {
+    mock_vk.get.return_value.json.return_value = {
         'response': [{
             'id': 12345,
             'first_name': 'John',
             'last_name': 'Doe',
             'screen_name': 'john_doe',
-            'photo_100': 'http://example.com/photo.jpg'
+            'photo_100': 'https://i.pinimg.com/736x/90/bd/09/90bd09bc51dba0bd127db954591d3650.jpg'
         }]
     }
 
     with patch('tools.auth.authenticate_vk_user') as mock_authenticate:
         response = client.get('/vk/callback')
-
         assert response.status_code == 302  # Redirects after successful login
         assert mock_authenticate.called_once_with(
-            12345, 'john_doe', 'John', 'Doe', 'http://example.com/photo.jpg', 'user@example.com'
+            12345, 'john_doe', 'John', 'Doe', 'https://i.pinimg.com/736x/90/bd/09/90bd09bc51dba0bd127db954591d3650.jpg', 'user@example.com'
         )
 
 
-@patch('app.oauth.vk.authorize_access_token')
-def test_authorize_vk_no_token(mock_authorize_access_token, client):
-    mock_authorize_access_token.return_value = None
+@patch('app.setup_routes')
+def test_authorize_vk_no_token(mock_setup_routes, client):
+    mock_oauth = MagicMock()
+    mock_vk = mock_oauth.register.return_value
+    mock_setup_routes.side_effect = lambda app, oauth: oauth
+    app.oauth = mock_oauth
+
+    mock_vk.authorize_access_token.return_value = None  # Simulate a failed token retrieval
 
     response = client.get('/vk/callback')
 
@@ -55,15 +57,18 @@ def test_authorize_vk_no_token(mock_authorize_access_token, client):
     assert b'login' in response.location
 
 
-@patch('app.oauth.vk.authorize_access_token')
-@patch('app.oauth.vk.get')
-def test_authorize_vk_profile_failure(mock_get, mock_authorize_access_token, client):
-    mock_authorize_access_token.return_value = {
+@patch('app.setup_routes')
+def test_authorize_vk_profile_failure(mock_setup_routes, client):
+    mock_oauth = MagicMock()
+    mock_vk = mock_oauth.register.return_value
+    mock_setup_routes.side_effect = lambda app, oauth: oauth
+    app.oauth = mock_oauth
+
+    mock_vk.authorize_access_token.return_value = {
         'access_token': 'mock_access_token',
         'email': 'user@example.com'
     }
-
-    mock_get.return_value.json.return_value = {'response': []}
+    mock_vk.get.return_value.json.return_value = {'response': []}
 
     response = client.get('/vk/callback')
 

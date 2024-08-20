@@ -1,3 +1,4 @@
+from authlib.integrations.flask_client import OAuth
 from dotenv import load_dotenv
 from flask import Flask
 from flask_migrate import Migrate
@@ -22,7 +23,8 @@ migrate = Migrate(app, db)
 
 login_manager.init_app(app)
 login_manager.login_view = 'login'
-setup_routes(app)
+oauth = OAuth()
+setup_routes(app, oauth)
 setup_admin(app, db)
 
 # Content Security Policy (CSP) Header
