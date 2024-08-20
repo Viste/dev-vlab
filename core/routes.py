@@ -154,10 +154,6 @@ def setup_routes(app, oauth):
 
     @app.route('/login/vk')
     def login_vk():
-        if 'device_id' in session:
-            session.clear()
-            current_app.logger.debug("Session cleared due to potential incomplete authorization.")
-
         state = 'dePbvCFsCkaixThxcVMOqs1K0WVEUtTI'
         session['state'] = state
         session['code_verifier'] = generate_code_verifier()
