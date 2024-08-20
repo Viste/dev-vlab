@@ -25,13 +25,12 @@ def authenticate_user(username, password):
     return False
 
 
-def authenticate_vk_user(vk_id, screen_name, first_name, last_name, profile_picture, email):
+def authenticate_vk_user(vk_id, user_name, first_name, last_name, email):
     user = User.query.filter_by(vk_id=vk_id).first()
 
     if not user:
         current_app.logger.debug(f"Creating a new VK user with ID: {vk_id}")
-        user = User(username=screen_name, vk_id=vk_id, first_name=first_name, last_name=last_name,
-                    profile_picture=profile_picture, email=email, provider='vk')
+        user = User(username=user_name, vk_id=vk_id, first_name=first_name, last_name=last_name, email=email, provider='vk')
         db.session.add(user)
 
         try:

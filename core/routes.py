@@ -5,7 +5,7 @@ from flask import render_template, redirect, url_for, request, flash, jsonify, s
 from flask_login import login_user, logout_user, login_required, current_user
 
 from database.models import db, Project, BlogPost, NavigationLink, User, Comment
-from tools.auth import authenticate_user
+from tools.auth import authenticate_user, authenticate_vk_user
 from tools.config import Config
 from tools.utils import generate_code_verifier, generate_code_challenge
 
@@ -258,8 +258,7 @@ def setup_routes(app, oauth):
 
         db.session.commit()
 
-        user = User.query.filter_by(vk_id=vk_id).first()
-        login_user(user)
+        authenticate_vk_user(vk_id, email.split('@')[0], first_name, last_name, email)
 
         flash(f'Successfully logged in as {first_name} {last_name}', 'success')
         current_app.logger.debug(f"User {first_name} {last_name} authenticated and logged in.")
