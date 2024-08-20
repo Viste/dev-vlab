@@ -1,3 +1,5 @@
+import logging
+
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
 from itsdangerous import URLSafeTimedSerializer as Serializer
@@ -6,6 +8,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from tools.config import Config
 
 db = SQLAlchemy()
+
+logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+logging.getLogger('sqlalchemy.pool').setLevel(logging.INFO)
+logging.getLogger('sqlalchemy.dialects').setLevel(logging.INFO)
 
 
 class BlogPost(db.Model):

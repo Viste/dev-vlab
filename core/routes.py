@@ -11,6 +11,10 @@ from tools.utils import generate_code_verifier, generate_code_challenge
 
 logging.basicConfig(level=logging.DEBUG)
 
+logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+logging.getLogger('sqlalchemy.pool').setLevel(logging.INFO)
+logging.getLogger('sqlalchemy.dialects').setLevel(logging.INFO)
+
 
 def setup_routes(app, oauth):
     oauth.init_app(app)
