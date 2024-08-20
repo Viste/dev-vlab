@@ -150,6 +150,10 @@ def setup_routes(app, oauth):
 
     @app.route('/login/vk')
     def login_vk():
+        if 'device_id' in session:
+            session.clear()
+            current_app.logger.debug("Session cleared due to potential incomplete authorization.")
+
         state = 'dePbvCFsCkaixThxcVMOqs1K0WVEUtTI'
         session['state'] = state
         session['code_verifier'] = generate_code_verifier()
@@ -176,6 +180,7 @@ def setup_routes(app, oauth):
         if state != session.get('state'):
             flash('State mismatch. Authorization failed.', 'danger')
             current_app.logger.debug(f"State mismatch during VK callback. Expected {session.get('state')}, got {state}.")
+            session.clear()
             return redirect(url_for('login'))
 
         data = {
@@ -184,7 +189,6 @@ def setup_routes(app, oauth):
             'code_verifier': session['code_verifier'],
             'code': code,
             'redirect_uri': url_for('authorize_vk', _external=True),
-            'device_id': session.get('device_id')
         }
 
         current_app.logger.debug(f"Exchanging VK code for tokens. Data: {data}")
@@ -194,16 +198,15 @@ def setup_routes(app, oauth):
         if 'access_token' not in tokens or 'device_id' not in tokens:
             flash('Failed to retrieve access token or device ID', 'danger')
             current_app.logger.debug(f"Failed to retrieve tokens from VK. Response: {tokens}")
+            session.clear()
             return redirect(url_for('login'))
 
-        # Сохранение access_token и device_id в сессии или базе данных
         access_token = tokens['access_token']
         device_id = tokens['device_id']
         session['device_id'] = device_id
         session['access_token'] = access_token
         current_app.logger.debug(f"Tokens received. Access Token: {access_token}, Device ID: {device_id}")
 
-        # Получение данных пользователя
         user_info = requests.post('https://id.vk.com/oauth2/user_info', data={
             'access_token': access_token,
             'client_id': Config.VK_CLIENT_ID
@@ -239,7 +242,6 @@ def setup_routes(app, oauth):
             current_app.logger.debug(f"Failed to refresh access token. Response: {tokens}")
             return None
 
-        # Сохранение нового access_token
         session['access_token'] = tokens['access_token']
         current_app.logger.debug(f"Access token refreshed. New Access Token: {tokens['access_token']}")
         return tokens
