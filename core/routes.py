@@ -134,10 +134,10 @@ def setup_routes(app, oauth):
             return redirect(url_for('login'))
         return render_template('auth/reset_password_token.html')
 
-    @app.route('/login/vk')
-    def login_vk():
-        redirect_uri = url_for('authorize_vk', _external=True)
-        return vk.authorize_redirect(redirect_uri)
+    #@app.route('/login/vk')
+    #def login_vk():
+    #    redirect_uri = url_for('authorize_vk', _external=True)
+    #    return vk.authorize_redirect(redirect_uri)
 
     @app.route('/login/vk')
     def login_vk():
