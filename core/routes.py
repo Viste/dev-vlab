@@ -12,7 +12,7 @@ def setup_routes(app, oauth):
         name='vk',
         client_id=Config.VK_CLIENT_ID,
         client_secret=Config.VK_CLIENT_SECRET,
-        authorize_url='https://id.vk.com/oauth2/auth',
+        authorize_url='https://id.vk.com/authorize',
         access_token_url='https://id.vk.com/oauth2/token',
         client_kwargs={
             'scope': 'email',
@@ -162,6 +162,11 @@ def setup_routes(app, oauth):
             )
 
             print(f'Response from VK: {resp.json()}')
+
+            if resp.status_code != 200:
+                print(f'VK API error: {resp.status_code} - {resp.text}')
+                flash(f'VK API error: {resp.status_code}', 'danger')
+                return redirect(url_for('login'))
 
             profile = resp.json().get('response', [])[0]
             if not profile:
