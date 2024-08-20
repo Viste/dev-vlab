@@ -48,6 +48,7 @@ csp = {
         'https://oauth.vk.com',
         'https://cdn4.cdn-telegram.org',
         'https://id.vk.com',
+        'https://encrypted-tbn0.gstatic.com'
     ]
 }
 # HTTP Strict Transport Security (HSTS) Header
