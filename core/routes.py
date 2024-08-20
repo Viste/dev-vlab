@@ -186,7 +186,7 @@ def setup_routes(app, oauth):
         data = {
             'client_id': Config.VK_CLIENT_ID,
             'grant_type': 'authorization_code',
-            'code_verifier': session['code_verifier'],
+            'code_verifier': session.get('code_verifier'),
             'code': code,
             'redirect_uri': url_for('authorize_vk', _external=True),
         }
@@ -218,7 +218,6 @@ def setup_routes(app, oauth):
             flash('Failed to retrieve user info from VK.', 'danger')
             current_app.logger.debug(f"Failed to retrieve user info. Response: {user_info}")
             return redirect(url_for('login'))
-
 
         user_id = user_info['user']['user_id']
         first_name = user_info['user']['first_name']
