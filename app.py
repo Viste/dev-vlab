@@ -1,3 +1,5 @@
+import logging
+
 from authlib.integrations.flask_client import OAuth
 from dotenv import load_dotenv
 from flask import Flask
@@ -18,6 +20,8 @@ app = Flask(__name__)
 talisman = Talisman(app)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1)
 app.config.from_object(Config)
+
+logging.basicConfig(level=logging.DEBUG)
 
 db.init_app(app)
 Session(app)

@@ -1,11 +1,15 @@
+import logging
+
 import requests
-from flask import render_template, redirect, url_for, request, flash, jsonify, session
+from flask import render_template, redirect, url_for, request, flash, jsonify, session, current_app
 from flask_login import login_user, logout_user, login_required, current_user
 
 from database.models import db, Project, BlogPost, NavigationLink, User, Comment
 from tools.auth import authenticate_vk_user, authenticate_user
 from tools.config import Config
 from tools.utils import generate_code_verifier, generate_code_challenge
+
+logging.basicConfig(level=logging.DEBUG)
 
 
 def setup_routes(app, oauth):
@@ -63,9 +67,11 @@ def setup_routes(app, oauth):
 
             if authenticate_user(username, password):
                 next_page = request.args.get('next')
+                current_app.logger.debug(f"User {username} authenticated successfully. Redirecting to {next_page or 'index'}.")
                 return redirect(next_page) if next_page else redirect(url_for('index'))
             else:
                 flash('Login Unsuccessful. Please check username and password', 'danger')
+                current_app.logger.debug(f"User {username} failed to authenticate.")
 
         return render_template('auth/login.html')
 
@@ -84,9 +90,11 @@ def setup_routes(app, oauth):
             user.first_name = first_name
             user.last_name = last_name
             user.profile_picture = profile_picture
+            current_app.logger.debug(f"Updated Telegram profile for user {username}.")
         else:
             user = User(telegram_id=telegram_id, username=username, first_name=first_name, last_name=last_name, profile_picture=profile_picture, provider='telegram')
             db.session.add(user)
+            current_app.logger.debug(f"Created new Telegram user {username}.")
 
         db.session.commit()
         return jsonify({"status": "success"}), 200
@@ -99,12 +107,14 @@ def setup_routes(app, oauth):
             user = User.query.filter_by(username=username).first()
             if user:
                 flash('Username already exists.', 'danger')
+                current_app.logger.debug(f"Registration failed: Username {username} already exists.")
                 return redirect(url_for('register'))
             new_user = User(username=username)
             new_user.set_password(password)
             db.session.add(new_user)
             db.session.commit()
             login_user(new_user)
+            current_app.logger.debug(f"User {username} registered and logged in successfully.")
             return redirect(url_for('index'))
         return render_template('auth/register.html')
 
@@ -115,8 +125,10 @@ def setup_routes(app, oauth):
             user = User.query.filter_by(username=username).first()
             if not user:
                 flash('No account found with that username.', 'danger')
+                current_app.logger.debug(f"Password reset failed: No account found for username {username}.")
                 return redirect(url_for('reset_password'))
             reset_token = user.get_reset_token()
+            current_app.logger.debug(f"Password reset token generated for username {username}.")
             return redirect(url_for('reset_password_token', token=reset_token))
         return render_template('auth/change_password.html')
 
@@ -125,12 +137,14 @@ def setup_routes(app, oauth):
         user = User.verify_reset_token(token)
         if not user:
             flash('Invalid or expired token', 'danger')
+            current_app.logger.debug(f"Password reset token invalid or expired.")
             return redirect(url_for('reset_password'))
         if request.method == 'POST':
             password = request.form['password']
             user.set_password(password)
             db.session.commit()
             flash('Your password has been updated!', 'success')
+            current_app.logger.debug(f"Password updated for username {user.username}.")
             return redirect(url_for('login'))
         return render_template('auth/reset_password_token.html')
 
@@ -151,6 +165,7 @@ def setup_routes(app, oauth):
                 '&code_challenge_method=s256'
         )
 
+        current_app.logger.debug(f"VK login initiated. Redirecting to VK Auth URL: {vk_auth_url}")
         return redirect(vk_auth_url)
 
     @app.route('/vk/callback')
@@ -160,6 +175,7 @@ def setup_routes(app, oauth):
 
         if state != session.get('state'):
             flash('State mismatch. Authorization failed.', 'danger')
+            current_app.logger.debug(f"State mismatch during VK callback. Expected {session.get('state')}, got {state}.")
             return redirect(url_for('login'))
 
         data = {
@@ -171,11 +187,13 @@ def setup_routes(app, oauth):
             'device_id': session.get('device_id')
         }
 
+        current_app.logger.debug(f"Exchanging VK code for tokens. Data: {data}")
         response = requests.post('https://id.vk.com/oauth2/auth', data=data)
         tokens = response.json()
 
         if 'access_token' not in tokens or 'device_id' not in tokens:
             flash('Failed to retrieve access token or device ID', 'danger')
+            current_app.logger.debug(f"Failed to retrieve tokens from VK. Response: {tokens}")
             return redirect(url_for('login'))
 
         # Сохранение access_token и device_id в сессии или базе данных
@@ -183,6 +201,7 @@ def setup_routes(app, oauth):
         device_id = tokens['device_id']
         session['device_id'] = device_id
         session['access_token'] = access_token
+        current_app.logger.debug(f"Tokens received. Access Token: {access_token}, Device ID: {device_id}")
 
         # Получение данных пользователя
         user_info = requests.post('https://id.vk.com/oauth2/user_info', data={
@@ -195,9 +214,12 @@ def setup_routes(app, oauth):
         last_name = user_info['user']['last_name']
         email = user_info['user']['email']
 
+        current_app.logger.debug(f"User info received from VK. User ID: {user_id}, Name: {first_name} {last_name}")
+
         authenticate_vk_user(user_id, first_name, last_name, email)
 
         flash(f'Successfully logged in as {first_name} {last_name}', 'success')
+        current_app.logger.debug(f"User {first_name} {last_name} authenticated and logged in.")
         return redirect(url_for('index'))
 
     def refresh_vk_token(refresh_token):
@@ -214,10 +236,12 @@ def setup_routes(app, oauth):
 
         if 'access_token' not in tokens:
             flash('Failed to refresh access token.', 'danger')
+            current_app.logger.debug(f"Failed to refresh access token. Response: {tokens}")
             return None
 
         # Сохранение нового access_token
         session['access_token'] = tokens['access_token']
+        current_app.logger.debug(f"Access token refreshed. New Access Token: {tokens['access_token']}")
         return tokens
 
     def logout_vk():
@@ -226,6 +250,7 @@ def setup_routes(app, oauth):
 
         if not access_token or not device_id:
             flash('Failed to logout: Missing access token or device ID.', 'danger')
+            current_app.logger.debug(f"Failed to logout from VK. Missing access token or device ID.")
             return redirect(url_for('index'))
 
         data = {
@@ -234,12 +259,15 @@ def setup_routes(app, oauth):
             'device_id': device_id
         }
 
+        current_app.logger.debug(f"Logging out from VK. Data: {data}")
         response = requests.post('https://id.vk.com/oauth2/logout', data=data)
 
         if response.json().get('response') == 1:
             flash('Successfully logged out of VK.', 'success')
+            current_app.logger.debug(f"Successfully logged out of VK.")
         else:
             flash('Failed to log out of VK.', 'danger')
+            current_app.logger.debug(f"Failed to log out of VK. Response: {response.json()}")
 
         # Очистка данных сессии
         session.pop('access_token', None)
@@ -252,4 +280,5 @@ def setup_routes(app, oauth):
     def logout():
         logout_vk()
         logout_user()
+        current_app.logger.debug(f"User logged out successfully.")
         return redirect(url_for('index'))
