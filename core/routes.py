@@ -208,10 +208,17 @@ def setup_routes(app, oauth):
         session['access_token'] = access_token
         current_app.logger.debug(f"Tokens received. Access Token: {access_token}, Device ID: {device_id}")
 
-        user_info = requests.post('https://id.vk.com/oauth2/user_info', data={
+        user_info_response = requests.post('https://id.vk.com/oauth2/user_info', data={
             'access_token': access_token,
             'client_id': Config.VK_CLIENT_ID
-        }).json()
+        })
+        user_info = user_info_response.json()
+
+        if not user_info or 'user' not in user_info:
+            flash('Failed to retrieve user info from VK.', 'danger')
+            current_app.logger.debug(f"Failed to retrieve user info. Response: {user_info}")
+            return redirect(url_for('login'))
+
 
         user_id = user_info['user']['user_id']
         first_name = user_info['user']['first_name']
