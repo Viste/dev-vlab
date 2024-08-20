@@ -35,11 +35,13 @@ def authenticate_vk_user(vk_id, screen_name, first_name, last_name, profile_pict
         db.session.add(user)
 
         try:
+            current_app.logger.debug(f"Attempting to commit new VK user to the database")
             db.session.commit()  # Фиксируем транзакцию
             current_app.logger.debug(f"New VK user created and committed to the database with ID: {user.id}")
         except Exception as e:
             current_app.logger.error(f"Failed to commit new VK user to the database. Error: {e}")
             db.session.rollback()  # Откатываем транзакцию в случае ошибки
+            current_app.logger.debug("Transaction rolled back")
             return False
 
     session['loggedin'] = True
