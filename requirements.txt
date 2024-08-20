@@ -25,3 +25,4 @@ Flask-OAuthlib
 requests-oauthlib
 pytest
 pytest-mock
+requests

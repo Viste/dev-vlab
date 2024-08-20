@@ -1,9 +1,11 @@
-from flask import render_template, redirect, url_for, request, flash, jsonify
+import requests
+from flask import render_template, redirect, url_for, request, flash, jsonify, session
 from flask_login import login_user, logout_user, login_required, current_user
 
 from database.models import db, Project, BlogPost, NavigationLink, User, Comment
 from tools.auth import authenticate_vk_user, authenticate_user
 from tools.config import Config
+from tools.utils import generate_code_verifier, generate_code_challenge
 
 
 def setup_routes(app, oauth):
@@ -137,60 +139,112 @@ def setup_routes(app, oauth):
         redirect_uri = url_for('authorize_vk', _external=True)
         return vk.authorize_redirect(redirect_uri)
 
+    @app.route('/login/vk')
+    def login_vk():
+        state = 'dePbvCFsCkaixThxcVMOqs1K0WVEUtTI'
+        session['state'] = state
+        session['code_verifier'] = generate_code_verifier()
+
+        vk_auth_url = (
+                'https://id.vk.com/authorize'
+                '?response_type=code'
+                '&client_id=' + Config.VK_CLIENT_ID +
+                '&scope=email phone'
+                '&redirect_uri=' + url_for('authorize_vk', _external=True) +
+                '&state=' + state +
+                '&code_challenge=' + generate_code_challenge(session['code_verifier']) +
+                '&code_challenge_method=s256'
+        )
+
+        return redirect(vk_auth_url)
+
     @app.route('/vk/callback')
     def authorize_vk():
-        try:
-            token = vk.authorize_access_token()
-            if not token:
-                flash('Failed to retrieve token from VK', 'danger')
-                return redirect(url_for('login'))
+        code = request.args.get('code')
+        state = request.args.get('state')
 
-            print(f'Token: {token}')
+        if state != session.get('state'):
+            flash('State mismatch. Authorization failed.', 'danger')
+            return redirect(url_for('login'))
 
-            access_token = token.get('access_token')
-            if not access_token:
-                flash('Access token is missing in the VK response', 'danger')
-                return redirect(url_for('login'))
+        data = {
+            'client_id': Config.VK_CLIENT_ID,
+            'grant_type': 'authorization_code',
+            'code_verifier': session['code_verifier'],
+            'code': code,
+            'redirect_uri': url_for('authorize_vk', _external=True),
+        }
 
-            resp = vk.get(
-                'https://id.vk.com/oauth2/user_info',
-                params={
-                    'access_token': access_token,
-                    'client_id': Config.VK_CLIENT_ID
-                }
-            )
+        response = requests.post('https://id.vk.com/oauth2/auth', data=data)
+        tokens = response.json()
 
-            print(f'Response from VK: {resp.json()}')
+        if 'access_token' not in tokens or 'device_id' not in tokens:
+            flash('Failed to retrieve access token or device ID', 'danger')
+            return redirect(url_for('login'))
 
-            if resp.status_code != 200:
-                print(f'VK API error: {resp.status_code} - {resp.text}')
-                flash(f'VK API error: {resp.status_code}', 'danger')
-                return redirect(url_for('login'))
+        # Сохранение access_token и device_id в сессии или базе данных
+        access_token = tokens['access_token']
+        device_id = tokens['device_id']
+        session['device_id'] = device_id
 
-            profile = resp.json().get('response', [])[0]
-            if not profile:
-                flash('Failed to retrieve user profile from VK', 'danger')
-                return redirect(url_for('login'))
+        # Получение данных пользователя
+        user_info = requests.post('https://id.vk.com/oauth2/user_info', data={
+            'access_token': access_token,
+            'client_id': Config.VK_CLIENT_ID
+        }).json()
 
-            vk_id = profile['id']
-            first_name = profile['first_name']
-            last_name = profile['last_name']
-            screen_name = profile.get('screen_name', f'vk_{vk_id}')
-            profile_picture = profile.get('photo_100', '')
-            email = token.get('email')
+        user_id = user_info['user']['user_id']
+        first_name = user_info['user']['first_name']
+        last_name = user_info['user']['last_name']
+        email = user_info['user']['email']
 
-            authenticate_vk_user(vk_id, screen_name, first_name, last_name, profile_picture, email)
+        authenticate_vk_user(user_id, first_name, last_name, email)
 
-            flash(f'Successfully logged in as {screen_name}', 'success')
+        flash(f'Successfully logged in as {first_name} {last_name}', 'success')
+        return redirect(url_for('index'))
+
+    def refresh_vk_token(refresh_token):
+        data = {
+            'grant_type': 'refresh_token',
+            'refresh_token': refresh_token,
+            'client_id': Config.VK_CLIENT_ID,
+            'device_id': session.get('device_id'),
+            'state': 'dePbvCFsCkaixThxcVMOqs1K0WVEUtTI'
+        }
+
+        response = requests.post('https://id.vk.com/oauth2/auth', data=data)
+        return response.json()
+
+    def logout_vk():
+        access_token = session.get('access_token')
+        device_id = session.get('device_id')
+
+        if not access_token or not device_id:
+            flash('Failed to logout: Missing access token or device ID.', 'danger')
             return redirect(url_for('index'))
 
-        except Exception as e:
-            print(f'Error during VK authorization: {e}')
-            flash('Authorization failed. Please try again.', 'danger')
-            return redirect(url_for('login'))
+        data = {
+            'client_id': Config.VK_CLIENT_ID,
+            'access_token': access_token,
+            'device_id': device_id
+        }
+
+        response = requests.post('https://id.vk.com/oauth2/logout', data=data)
+
+        if response.json().get('response') == 1:
+            flash('Successfully logged out of VK.', 'success')
+        else:
+            flash('Failed to log out of VK.', 'danger')
+
+        # Очистка данных сессии
+        session.pop('access_token', None)
+        session.pop('device_id', None)
+
+        return response.json()
 
     @app.route('/logout')
     @login_required
     def logout():
+        logout_vk()
         logout_user()
         return redirect(url_for('index'))
