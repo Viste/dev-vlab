@@ -43,6 +43,8 @@ csp = {
         '\'self\'',
         'https://code.jquery.com',
         'https://cdn.jsdelivr.net',
+        'https://fonts.googleapis.com',
+        'https://cdnjs.cloudflare.com',
         'https://i.pinimg.com',
         'https://oauth.telegram.org',
         'https://oauth.vk.com',
