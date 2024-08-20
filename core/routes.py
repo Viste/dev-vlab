@@ -12,8 +12,8 @@ def setup_routes(app, oauth):
         name='vk',
         client_id=Config.VK_CLIENT_ID,
         client_secret=Config.VK_CLIENT_SECRET,
-        authorize_url='https://id.vk.com/auth',
-        access_token_url='https://id.vk.com/token',
+        authorize_url='https://id.vk.com/oauth2/auth',
+        access_token_url='https://id.vk.com/oauth2/token',
         client_kwargs={
             'scope': 'email',
             'token_endpoint_auth_method': 'client_secret_post',
