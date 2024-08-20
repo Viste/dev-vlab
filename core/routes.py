@@ -197,7 +197,7 @@ def setup_routes(app, oauth):
             'grant_type': 'authorization_code',
             'code_verifier': session.get('code_verifier'),
             'code': code,
-            'device_id': device_id,  # Передаем device_id в запросе на получение токена
+            'device_id': device_id,
             'redirect_uri': url_for('authorize_vk', _external=True),
         }
 
@@ -230,17 +230,34 @@ def setup_routes(app, oauth):
         last_name = user_info['user']['last_name']
         email = user_info['user']['email']
 
-        current_user.vk_id = vk_id
-        current_user.first_name = first_name
-        current_user.last_name = last_name
-        current_user.email = email
-        current_user.device_id = device_id
-        current_user.access_token = access_token
-        current_user.refresh_token = refresh_token
+        user = User.query.filter_by(vk_id=vk_id).first()
 
-        user = current_user
-        db.session.add(user)
+        if not user:
+            user = User(
+                username=email.split('@')[0],
+                vk_id=vk_id,
+                first_name=first_name,
+                last_name=last_name,
+                email=email,
+                device_id=device_id,
+                access_token=access_token,
+                refresh_token=refresh_token
+            )
+            db.session.add(user)
+            current_app.logger.debug(f"Created new VK user with ID: {vk_id}")
+
+        else:
+            user.device_id = device_id
+            user.access_token = access_token
+            user.refresh_token = refresh_token
+            user.first_name = first_name
+            user.last_name = last_name
+            user.email = email
+
+            db.session.add(user)
+
         db.session.commit()
+        login_user(user)
 
         flash(f'Successfully logged in as {first_name} {last_name}', 'success')
         current_app.logger.debug(f"User {first_name} {last_name} authenticated and logged in.")
