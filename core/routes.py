@@ -238,6 +238,8 @@ def setup_routes(app, oauth):
         current_user.access_token = access_token
         current_user.refresh_token = refresh_token
 
+        user = current_user
+        db.session.add(user)
         db.session.commit()
 
         flash(f'Successfully logged in as {first_name} {last_name}', 'success')
