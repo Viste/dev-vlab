@@ -15,9 +15,9 @@ def setup_routes(app, oauth):
         client_id=Config.VK_CLIENT_ID,
         client_secret=Config.VK_CLIENT_SECRET,
         authorize_url='https://id.vk.com/authorize',
-        access_token_url='https://id.vk.com/token',
+        access_token_url='https://id.vk.com/oauth2/auth',
         client_kwargs={
-            'scope': 'email',
+            'scope': 'email phone',
             'token_endpoint_auth_method': 'client_secret_post',
             'token_placement': 'header',
             'response_type': 'code'
@@ -134,11 +134,6 @@ def setup_routes(app, oauth):
             return redirect(url_for('login'))
         return render_template('auth/reset_password_token.html')
 
-    #@app.route('/login/vk')
-    #def login_vk():
-    #    redirect_uri = url_for('authorize_vk', _external=True)
-    #    return vk.authorize_redirect(redirect_uri)
-
     @app.route('/login/vk')
     def login_vk():
         state = 'dePbvCFsCkaixThxcVMOqs1K0WVEUtTI'
@@ -173,6 +168,7 @@ def setup_routes(app, oauth):
             'code_verifier': session['code_verifier'],
             'code': code,
             'redirect_uri': url_for('authorize_vk', _external=True),
+            'device_id': session.get('device_id')
         }
 
         response = requests.post('https://id.vk.com/oauth2/auth', data=data)
@@ -186,6 +182,7 @@ def setup_routes(app, oauth):
         access_token = tokens['access_token']
         device_id = tokens['device_id']
         session['device_id'] = device_id
+        session['access_token'] = access_token
 
         # Получение данных пользователя
         user_info = requests.post('https://id.vk.com/oauth2/user_info', data={
@@ -213,7 +210,15 @@ def setup_routes(app, oauth):
         }
 
         response = requests.post('https://id.vk.com/oauth2/auth', data=data)
-        return response.json()
+        tokens = response.json()
+
+        if 'access_token' not in tokens:
+            flash('Failed to refresh access token.', 'danger')
+            return None
+
+        # Сохранение нового access_token
+        session['access_token'] = tokens['access_token']
+        return tokens
 
     def logout_vk():
         access_token = session.get('access_token')
