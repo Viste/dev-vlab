@@ -57,6 +57,9 @@ class User(db.Model, UserMixin):
     provider = db.Column(db.String(50), nullable=True)
     is_admin = db.Column(db.Boolean)
     is_banned = db.Column(db.Boolean)
+    device_id = db.Column(db.String(150), nullable=True)
+    access_token = db.Column(db.String(500), nullable=True)
+    refresh_token = db.Column(db.String(500), nullable=True)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)

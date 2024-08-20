@@ -5,7 +5,7 @@ from flask import render_template, redirect, url_for, request, flash, jsonify, s
 from flask_login import login_user, logout_user, login_required, current_user
 
 from database.models import db, Project, BlogPost, NavigationLink, User, Comment
-from tools.auth import authenticate_vk_user, authenticate_user
+from tools.auth import authenticate_user
 from tools.config import Config
 from tools.utils import generate_code_verifier, generate_code_challenge
 
@@ -176,6 +176,7 @@ def setup_routes(app, oauth):
     def authorize_vk():
         code = request.args.get('code')
         state = request.args.get('state')
+        device_id = request.args.get('device_id')
 
         if state != session.get('state'):
             flash('State mismatch. Authorization failed.', 'danger')
@@ -183,11 +184,20 @@ def setup_routes(app, oauth):
             session.clear()
             return redirect(url_for('login'))
 
+        if not device_id:
+            flash('Device ID is missing in the callback response.', 'danger')
+            current_app.logger.debug("Device ID is missing in the callback response.")
+            return redirect(url_for('login'))
+
+        session['device_id'] = device_id
+        current_app.logger.debug(f"Received device ID: {device_id}")
+
         data = {
             'client_id': Config.VK_CLIENT_ID,
             'grant_type': 'authorization_code',
             'code_verifier': session.get('code_verifier'),
             'code': code,
+            'device_id': device_id,  # Передаем device_id в запросе на получение токена
             'redirect_uri': url_for('authorize_vk', _external=True),
         }
 
@@ -195,18 +205,14 @@ def setup_routes(app, oauth):
         response = requests.post('https://id.vk.com/oauth2/auth', data=data)
         tokens = response.json()
 
-        if 'access_token' not in tokens or 'device_id' not in tokens:
-            flash('Failed to retrieve access token or device ID', 'danger')
+        if 'access_token' not in tokens:
+            flash('Failed to retrieve access token.', 'danger')
             current_app.logger.debug(f"Failed to retrieve tokens from VK. Response: {tokens}")
-            logout_vk()
             session.clear()
             return redirect(url_for('login'))
 
         access_token = tokens['access_token']
-        device_id = tokens['device_id']
-        session['device_id'] = device_id
-        session['access_token'] = access_token
-        current_app.logger.debug(f"Tokens received. Access Token: {access_token}, Device ID: {device_id}")
+        refresh_token = tokens.get('refresh_token')
 
         user_info_response = requests.post('https://id.vk.com/oauth2/user_info', data={
             'access_token': access_token,
@@ -219,14 +225,20 @@ def setup_routes(app, oauth):
             current_app.logger.debug(f"Failed to retrieve user info. Response: {user_info}")
             return redirect(url_for('login'))
 
-        user_id = user_info['user']['user_id']
+        vk_id = user_info['user']['user_id']
         first_name = user_info['user']['first_name']
         last_name = user_info['user']['last_name']
         email = user_info['user']['email']
 
-        current_app.logger.debug(f"User info received from VK. User ID: {user_id}, Name: {first_name} {last_name}")
+        current_user.vk_id = vk_id
+        current_user.first_name = first_name
+        current_user.last_name = last_name
+        current_user.email = email
+        current_user.device_id = device_id
+        current_user.access_token = access_token
+        current_user.refresh_token = refresh_token
 
-        authenticate_vk_user(user_id, first_name, last_name, email)
+        db.session.commit()
 
         flash(f'Successfully logged in as {first_name} {last_name}', 'success')
         current_app.logger.debug(f"User {first_name} {last_name} authenticated and logged in.")
