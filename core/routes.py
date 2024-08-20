@@ -41,7 +41,7 @@ def setup_routes(app, oauth):
     @app.route('/profile')
     @login_required
     def profile():
-        return render_template('profile.html', user=current_user)
+        return render_template('auth/profile.html', user=current_user)
 
     @app.route('/blog')
     def blog():
