@@ -22,9 +22,9 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1)
 app.config.from_object(Config)
 
 logging.basicConfig(level=logging.DEBUG)
-logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
-logging.getLogger('sqlalchemy.pool').setLevel(logging.INFO)
-logging.getLogger('sqlalchemy.dialects').setLevel(logging.INFO)
+logging.getLogger('sqlalchemy.engine').setLevel(logging.DEBUG)
+logging.getLogger('sqlalchemy.pool').setLevel(logging.DEBUG)
+logging.getLogger('sqlalchemy.dialects').setLevel(logging.DEBUG)
 
 db.init_app(app)
 Session(app)
