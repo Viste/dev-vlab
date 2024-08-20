@@ -143,23 +143,30 @@ def setup_routes(app):
     def authorize_vk():
         try:
             token = vk.authorize_access_token()
-            access_token = token.get('access_token')
-            if not access_token:
-                flash('Failed to retrieve access token from VK', 'danger')
+            if not token:
+                flash('Failed to retrieve token from VK', 'danger')
                 return redirect(url_for('login'))
 
-            print(f'Token received: {token}')
+            print(f'Token: {token}')
+
+            access_token = token.get('access_token')
+            if not access_token:
+                flash('Access token is missing in the VK response', 'danger')
+                return redirect(url_for('login'))
 
             resp = vk.get(
                 'https://api.vk.com/method/users.get',
-                token={'access_token': access_token, 'v': '5.131'},
                 params={
+                    'access_token': access_token,
+                    'v': '5.131',
                     'fields': 'id,first_name,last_name,screen_name,photo_100,email'
                 }
             )
 
+            print(f'Response from VK: {resp.json()}')
+
             profile = resp.json().get('response', [])[0]
-            if profile is None:
+            if not profile:
                 flash('Failed to retrieve user profile from VK', 'danger')
                 return redirect(url_for('login'))
 
@@ -170,16 +177,16 @@ def setup_routes(app):
             profile_picture = profile.get('photo_100', '')
             email = token.get('email')
 
+            # Авторизуем пользователя в системе
             authenticate_vk_user(vk_id, screen_name, first_name, last_name, profile_picture, email)
 
             flash(f'Successfully logged in as {screen_name}', 'success')
             return redirect(url_for('index'))
 
         except Exception as e:
-            print(f'Error during VK authorization: {e}')  # Логирование ошибки
+            print(f'Error during VK authorization: {e}')
             flash('Authorization failed. Please try again.', 'danger')
             return redirect(url_for('login'))
-
 
     @app.route('/logout')
     @login_required
