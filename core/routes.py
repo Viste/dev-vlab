@@ -198,6 +198,7 @@ def setup_routes(app, oauth):
         if 'access_token' not in tokens or 'device_id' not in tokens:
             flash('Failed to retrieve access token or device ID', 'danger')
             current_app.logger.debug(f"Failed to retrieve tokens from VK. Response: {tokens}")
+            logout_vk()
             session.clear()
             return redirect(url_for('login'))
 
@@ -248,17 +249,15 @@ def setup_routes(app, oauth):
 
     def logout_vk():
         access_token = session.get('access_token')
-        device_id = session.get('device_id')
 
-        if not access_token or not device_id:
-            flash('Failed to logout: Missing access token or device ID.', 'danger')
-            current_app.logger.debug(f"Failed to logout from VK. Missing access token or device ID.")
-            return redirect(url_for('index'))
+        if not access_token:
+            flash('Failed to logout: Missing access token.', 'danger')
+            current_app.logger.debug(f"Failed to logout from VK. Missing access token.")
+            return
 
         data = {
             'client_id': Config.VK_CLIENT_ID,
-            'access_token': access_token,
-            'device_id': device_id
+            'access_token': access_token
         }
 
         current_app.logger.debug(f"Logging out from VK. Data: {data}")
@@ -274,8 +273,6 @@ def setup_routes(app, oauth):
         # Очистка данных сессии
         session.pop('access_token', None)
         session.pop('device_id', None)
-
-        return response.json()
 
     @app.route('/logout')
     @login_required
