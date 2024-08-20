@@ -1,3 +1,4 @@
+from flask import current_app
 from flask import session
 from flask_login import LoginManager, login_user, logout_user
 from werkzeug.security import check_password_hash
@@ -35,6 +36,7 @@ def authenticate_vk_user(vk_id, screen_name, first_name, last_name, profile_pict
     session['id'] = user.id
     session['username'] = user.username
     login_user(user)
+    current_app.logger.debug(f"User {user.username} authenticated and logged in")
     return True
 
 

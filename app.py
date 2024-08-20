@@ -2,6 +2,7 @@ from authlib.integrations.flask_client import OAuth
 from dotenv import load_dotenv
 from flask import Flask
 from flask_migrate import Migrate
+from flask_session import Session
 from flask_talisman import Talisman
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -17,7 +18,9 @@ app = Flask(__name__)
 talisman = Talisman(app)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1)
 app.config.from_object(Config)
+
 db.init_app(app)
+Session(app)
 migrate = Migrate(app, db)
 
 

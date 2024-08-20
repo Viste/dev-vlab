@@ -1,6 +1,7 @@
 flask[async]
 flask-admin[async]
 flask-login[async]
+Flask-Session
 Flask-SQLAlchemy
 Flask-Migrate
 alembic
@@ -26,3 +27,4 @@ requests-oauthlib
 pytest
 pytest-mock
 requests
+redis

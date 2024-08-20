@@ -1,5 +1,7 @@
 import os
 
+import redis
+
 
 class Config:
     SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI', 'mariadb+pymysql://user:pass@localhost/base?charset=utf8mb4')
@@ -11,10 +13,11 @@ class Config:
     SQLALCHEMY_MAX_OVERFLOW = 5
     SQLALCHEMY_ENGINE_OPTIONS = {"pool_pre_ping": True}
 
-    TELEGRAM_BOT_TOKEN = os.getenv('TG_BOT_TOKEN')
-    TELEGRAM_BOT_NAME = 'dev_vlab_bot'
-
     # VKontakte OAuth configuration
     VK_CLIENT_ID = os.getenv('VK_CLIENT_ID')
     VK_CLIENT_SECRET = os.getenv('VK_CLIENT_SECRET')
-    VK_REDIRECT_URI = os.getenv('VK_REDIRECT_URI', 'http://localhost:5000/vk/authorize')
+    SESSION_TYPE = 'redis'
+    SESSION_PERMANENT = False
+    SESSION_USE_SIGNER = True
+    SESSION_KEY_PREFIX = 'vlab_session:'
+    SESSION_REDIS = redis.StrictRedis(host='redis-master.redis.svc.cluster.local', port=6379, db=0)
