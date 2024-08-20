@@ -47,6 +47,7 @@ csp = {
         'https://fonts.gstatic.com',
         'https://cdnjs.cloudflare.com',
         'https://i.pinimg.com',
+        'https://dev-vlab.ru',
         'https://oauth.telegram.org',
         'https://oauth.vk.com',
         'https://id.vk.com',
