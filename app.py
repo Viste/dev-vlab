@@ -45,7 +45,9 @@ csp = {
         'https://cdn.jsdelivr.net',
         'https://i.pinimg.com',
         'https://oauth.telegram.org',
-        'https://oauth.vk.com'
+        'https://oauth.vk.com',
+        'https://cdn4.cdn-telegram.org',
+        'https://id.vk.com',
     ]
 }
 # HTTP Strict Transport Security (HSTS) Header
