@@ -13,7 +13,7 @@ def setup_routes(app, oauth):
         client_id=Config.VK_CLIENT_ID,
         client_secret=Config.VK_CLIENT_SECRET,
         authorize_url='https://id.vk.com/authorize',
-        access_token_url='https://id.vk.com/oauth2/token',
+        access_token_url='https://id.vk.com/token',
         client_kwargs={
             'scope': 'email',
             'token_endpoint_auth_method': 'client_secret_post',
@@ -153,11 +153,10 @@ def setup_routes(app, oauth):
                 return redirect(url_for('login'))
 
             resp = vk.get(
-                'https://api.vk.com/method/users.get',
+                'https://id.vk.com/oauth2/user_info',
                 params={
                     'access_token': access_token,
-                    'v': '5.131',
-                    'fields': 'id,first_name,last_name,screen_name,photo_100,email'
+                    'client_id': Config.VK_CLIENT_ID
                 }
             )
 
