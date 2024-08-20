@@ -8,20 +8,20 @@ from tools.config import Config
 
 oauth = OAuth()
 
-print(f'VK_CLIENT_ID: {Config.VK_CLIENT_ID}')
-print(f'VK_CLIENT_SECRET: {Config.VK_CLIENT_SECRET}')
-
-
 def setup_routes(app):
-    # Настройка OAuth для VK
     oauth.init_app(app)
     vk = oauth.register(
         name='vk',
         client_id=Config.VK_CLIENT_ID,
         client_secret=Config.VK_CLIENT_SECRET,
-        authorize_url='https://oauth.vk.com/authorize',
-        access_token_url='https://oauth.vk.com/access_token',
-        client_kwargs={'scope': 'email'}
+        authorize_url='https://id.vk.com/auth',
+        access_token_url='https://id.vk.com/token',
+        client_kwargs={
+            'scope': 'email',
+            'token_endpoint_auth_method': 'client_secret_post',
+            'token_placement': 'header',
+            'response_type': 'code'
+        },
     )
 
     @app.route('/')
@@ -177,7 +177,6 @@ def setup_routes(app):
             profile_picture = profile.get('photo_100', '')
             email = token.get('email')
 
-            # Авторизуем пользователя в системе
             authenticate_vk_user(vk_id, screen_name, first_name, last_name, profile_picture, email)
 
             flash(f'Successfully logged in as {screen_name}', 'success')
