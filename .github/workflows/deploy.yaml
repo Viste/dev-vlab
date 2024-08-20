@@ -32,7 +32,6 @@ jobs:
 
   build-image:
     runs-on: ubuntu-latest
-    needs: test
     steps:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
