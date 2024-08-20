@@ -257,6 +257,8 @@ def setup_routes(app, oauth):
             db.session.add(user)
 
         db.session.commit()
+
+        user = User.query.filter_by(vk_id=vk_id).first()
         login_user(user)
 
         flash(f'Successfully logged in as {first_name} {last_name}', 'success')
