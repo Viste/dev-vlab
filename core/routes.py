@@ -147,7 +147,8 @@ def setup_routes(app, oauth):
             if phone_number:
                 session['phone_number'] = phone_number
                 try:
-                    await client.send_code_request(phone_number)
+                    result = await client.send_code_request(phone_number)
+                    session['phone_code_hash'] = result.phone_code_hash
                     return jsonify({'success': True})
                 except errors.PhoneNumberInvalidError:
                     return jsonify({'success': False, 'message': 'Неправильный номер телефона. Попробуйте снова.'})
@@ -157,8 +158,9 @@ def setup_routes(app, oauth):
 
             if code:
                 phone_number = session.get('phone_number')
+                phone_code_hash = session.get('phone_code_hash')
                 try:
-                    await client.sign_in(phone_number, code)
+                    await client.sign_in(phone_number, code, phone_code_hash=phone_code_hash)
                     user_info = await client.get_me()
 
                     user = User.query.filter_by(telegram_id=user_info.id).first()

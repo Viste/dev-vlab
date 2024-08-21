@@ -85,11 +85,13 @@
                 {% if session.loggedin %}
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="{{ current_user.profile_picture_url }}" alt="Profile" class="profile-icon">
+                        <img src="{{ current_user.profile_picture_url }}" class="profile-icon">
                         Профиль
                     </a>
                     <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDropdown">
                         <li><a class="dropdown-item" href="{{ url_for('profile') }}">Мой профиль</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('reset_password') }}">Сменить пароль</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('reset_password') }}">Сменить пароль</a></li>
                         {% if current_user.is_admin %}
                         <li><a class="dropdown-item" href="{{ url_for('admin.index') }}">Админка</a></li>
                         {% endif %}
