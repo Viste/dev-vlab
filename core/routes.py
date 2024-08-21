@@ -310,5 +310,6 @@ def setup_routes(app, oauth):
     def logout():
         logout_vk()
         logout_user()
+        session.clear()
         current_app.logger.debug(f"User logged out successfully.")
         return redirect(url_for('index'))
