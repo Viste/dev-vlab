@@ -1,9 +1,12 @@
 import logging
+import os
 
 import requests
-from flask import render_template, redirect, url_for, request, flash, session, current_app, jsonify
+from aiogram import Bot, Dispatcher, types
+from aiogram.filters import CommandStart
+from aiogram.fsm.storage.memory import MemoryStorage
+from flask import render_template, redirect, url_for, request, flash, session, current_app
 from flask_login import login_user, logout_user, login_required, current_user
-from telethon import TelegramClient, errors
 
 from database.models import db, Project, BlogPost, NavigationLink, User, Comment
 from tools.auth import authenticate_user, authenticate_vk_user
@@ -18,6 +21,54 @@ logging.getLogger('sqlalchemy.dialects').setLevel(logging.DEBUG)
 
 api_id = Config.TELEGRAM_API_ID
 api_hash = Config.TELEGRAM_API_HASH
+
+TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
+bot = Bot(token=TELEGRAM_BOT_TOKEN)
+dp = Dispatcher(storage=MemoryStorage())
+
+
+@dp.message(CommandStart())
+async def start_handler(message: types.Message):
+    if 'auth' in message.text:
+        telegram_user_data = {
+            'telegram_id': str(message.from_user.id),
+            'username': message.from_user.username,
+            'first_name': message.from_user.first_name,
+            'last_name': message.from_user.last_name
+        }
+
+        user = User.query.filter_by(telegram_id=telegram_user_data['telegram_id']).first()
+        if not user:
+            user = User(
+                telegram_id=telegram_user_data['telegram_id'],
+                username=telegram_user_data['username'],
+                first_name=telegram_user_data['first_name'],
+                last_name=telegram_user_data['last_name'],
+                provider='telegram'
+            )
+            db.session.add(user)
+        else:
+            user.username = telegram_user_data['username']
+            user.first_name = telegram_user_data['first_name']
+            user.last_name = telegram_user_data['last_name']
+
+        db.session.commit()
+
+        # Авторизация пользователя через Flask-Login
+        login_user(user)
+
+        session['telegram_user'] = {
+            'id': user.id,
+            'telegram_id': user.telegram_id,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'username': user.username
+        }
+
+        await message.answer("Вы успешно авторизовались через Telegram!")
+        await message.answer("Теперь вы можете вернуться на сайт.")
+    else:
+        await message.answer("Привет! Используйте /start auth для авторизации.")
 
 
 def setup_routes(app, oauth):
@@ -135,96 +186,16 @@ def setup_routes(app, oauth):
             return redirect(url_for('login'))
         return render_template('auth/reset_password_token.html')
 
+    # Маршрут для вебхуков
+    @app.route('/webhook', methods=['POST'])
+    async def webhook():
+        update = types.Update(**request.json)
+        await dp.feed_update(bot, update)
+        return "!", 200
+
     @app.route('/login/telegram', methods=['GET', 'POST'])
-    async def login_telegram():
-        if request.method == 'POST':
-            phone_number = request.form.get('phone')
-            code = request.form.get('code')
-            password = request.form.get('password')
-
-            client = TelegramClient('session_name', api_id, api_hash)
-            await client.connect()
-
-            if phone_number:
-                session['phone_number'] = phone_number
-                try:
-                    result = await client.send_code_request(phone_number)
-                    session['phone_code_hash'] = result.phone_code_hash
-                    return jsonify({'success': True, 'step': 'code'})
-                except errors.PhoneNumberInvalidError:
-                    return jsonify({'success': False, 'message': 'Неправильный номер телефона. Попробуйте снова.'})
-                except Exception as e:
-                    logging.error(f'Error sending code: {e}')
-                    return jsonify({'success': False, 'message': 'Ошибка при отправке кода. Попробуйте снова.'})
-
-            if code:
-                phone_number = session.get('phone_number')
-                phone_code_hash = session.get('phone_code_hash')
-                try:
-                    await client.sign_in(phone_number, code, phone_code_hash=phone_code_hash)
-                    user_info = await client.get_me()
-
-                    user = User.query.filter_by(telegram_id=user_info.id).first()
-                    if not user:
-                        username = user_info.username if user_info.username else f"telegram_{user_info.id}"
-                        user = User(
-                            username=username,
-                            telegram_id=user_info.id,
-                            first_name=user_info.first_name,
-                            last_name=user_info.last_name,
-                        )
-                        db.session.add(user)
-                        db.session.commit()
-
-                    session['loggedin'] = True
-                    session['id'] = user.id
-                    session['username'] = user.username
-                    login_user(user)
-
-                    await client.disconnect()
-                    return jsonify({'success': True, 'step': 'done'})
-
-                except errors.SessionPasswordNeededError:
-                    return jsonify({'success': True, 'step': 'password'})
-                except errors.PhoneCodeInvalidError:
-                    return jsonify({'success': False, 'message': 'Неправильный код подтверждения. Попробуйте снова.'})
-                except errors.PhoneCodeExpiredError:
-                    return jsonify({'success': False, 'message': 'Код подтверждения устарел. Запросите новый код.'})
-                except Exception as e:
-                    logging.error(f'Error during authentication: {e}')
-                    return jsonify({'success': False, 'message': 'Ошибка при аутентификации. Проверьте код и попробуйте снова.'})
-
-            if password:  # Если требуется пароль
-                try:
-                    await client.sign_in(password=password)
-                    user_info = await client.get_me()
-
-                    user = User.query.filter_by(telegram_id=user_info.id).first()
-                    if not user:
-                        username = user_info.username if user_info.username else f"telegram_{user_info.id}"
-                        user = User(
-                            username=username,
-                            telegram_id=user_info.id,
-                            first_name=user_info.first_name,
-                            last_name=user_info.last_name,
-                        )
-                        db.session.add(user)
-                        db.session.commit()
-
-                    session['loggedin'] = True
-                    session['id'] = user.id
-                    session['username'] = user.username
-                    login_user(user)
-
-                    await client.disconnect()
-                    return jsonify({'success': True, 'step': 'done'})
-                except errors.PasswordHashInvalidError:
-                    return jsonify({'success': False, 'message': 'Неправильный пароль. Попробуйте снова.'})
-                except Exception as e:
-                    logging.error(f'Error during authentication with password: {e}')
-                    return jsonify({'success': False, 'message': 'Ошибка при аутентификации. Попробуйте снова.'})
-
-        return render_template('auth/login_telegram.html')
+    def login_telegram():
+        return redirect(f"https://telegram.me/dev_vlab_bot?start=auth")
 
     @app.route('/login/vk')
     def login_vk():

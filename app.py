@@ -1,5 +1,8 @@
+import asyncio
 import logging
 
+from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
+from aiohttp import web
 from authlib.integrations.flask_client import OAuth
 from dotenv import load_dotenv
 from flask import Flask
@@ -9,6 +12,7 @@ from flask_talisman import Talisman
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from core.admin import setup_admin
+from core.routes import bot, dp
 from core.routes import setup_routes
 from database.models import db
 from tools.auth import login_manager
@@ -85,4 +89,10 @@ talisman.content_security_policy = csp
 talisman.strict_transport_security = hsts
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', debug=True, use_reloader=False)
+    logging.basicConfig(level=logging.INFO)
+
+    # Устанавливаем webhook для бота
+    asyncio.run(bot.set_webhook(url="https://dev-vlab.ru/webhook"))
+
+    # Запускаем веб-сервер Flask и aiogram
+    web.run_app(setup_application(app, SimpleRequestHandler(dispatcher=dp, bot=bot)), host="0.0.0.0", port=8000)
