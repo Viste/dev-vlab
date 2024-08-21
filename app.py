@@ -45,7 +45,7 @@ csp = {
         'https://cdn.jsdelivr.net',
         'https://fonts.googleapis.com',
         'https://fonts.gstatic.com',
-        'https://cdnjs.cloudflare.com',
+        'https://cdnjs.cloudflare.com',  # Added this line to allow Font Awesome from cdnjs
         'https://i.pinimg.com',
         'https://dev-vlab.ru',
         'https://oauth.telegram.org',
@@ -55,9 +55,10 @@ csp = {
     ],
     'style-src': [
         '\'self\'',
-        '\'unsafe-inline\'',  # Allows inline styles
+        '\'unsafe-inline\'',  # Allows inline styles (considered less secure)
         'https://fonts.googleapis.com',
-        'https://cdn.jsdelivr.net'
+        'https://cdn.jsdelivr.net',
+        'https://cdnjs.cloudflare.com'  # Added this line to allow styles from cdnjs
     ],
     'script-src': [
         '\'self\'',
