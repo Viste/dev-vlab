@@ -141,11 +141,11 @@ def setup_routes(app, oauth):
             phone_number = request.form['phone']
             session['phone_number'] = phone_number
 
-            async with TelegramClient('session_name', api_id, api_hash) as client:
+            client = TelegramClient('session_name', api_id, api_hash)
+            await client.connect()
+
+            if not await client.is_user_authorized():
                 await client.send_code_request(phone_number)
-                session['phone_number'] = phone_number
-                session['api_id'] = api_id
-                session['api_hash'] = api_hash
                 return redirect(url_for('enter_telegram_code'))
 
         return render_template('auth/login_telegram.html')
@@ -156,34 +156,37 @@ def setup_routes(app, oauth):
             code = request.form['code']
             phone_number = session.get('phone_number')
 
-            async with TelegramClient('session_name', session['api_id'], session['api_hash']) as client:
-                try:
-                    await client.sign_in(phone_number, code)
+            client = TelegramClient('session_name', api_id, api_hash)
+            await client.connect()
 
-                    user_info = await client.get_me()
-                    user = User.query.filter_by(telegram_id=user_info.id).first()
+            try:
+                await client.sign_in(phone_number, code)
 
-                    if not user:
-                        username = user_info.username if user_info.username else f"telegram_{user_info.id}"
-                        user = User(
-                            username=username,
-                            telegram_id=user_info.id,
-                            first_name=user_info.first_name,
-                            last_name=user_info.last_name,
-                        )
-                        db.session.add(user)
-                        db.session.commit()
+                user_info = await client.get_me()
+                user = User.query.filter_by(telegram_id=user_info.id).first()
 
-                    session['loggedin'] = True
-                    session['id'] = user.id
-                    session['username'] = user.username
-                    login_user(user)
+                if not user:
+                    username = user_info.username if user_info.username else f"telegram_{user_info.id}"
+                    user = User(
+                        username=username,
+                        telegram_id=user_info.id,
+                        first_name=user_info.first_name,
+                        last_name=user_info.last_name,
+                    )
+                    db.session.add(user)
+                    db.session.commit()
 
-                    return redirect(url_for('index'))
+                session['loggedin'] = True
+                session['id'] = user.id
+                session['username'] = user.username
+                login_user(user)
 
-                except Exception as e:
-                    flash('Failed to authenticate via Telegram. Please check the code and try again.', 'danger')
-                    return redirect(url_for('login_telegram'))
+                await client.disconnect()
+                return redirect(url_for('index'))
+
+            except Exception as e:
+                flash('Failed to authenticate via Telegram. Please check the code and try again.', 'danger')
+                return redirect(url_for('login_telegram'))
 
         return render_template('auth/enter_telegram_code.html')
 
