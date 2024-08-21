@@ -52,6 +52,18 @@ csp = {
         'https://oauth.vk.com',
         'https://id.vk.com',
         'https://encrypted-tbn0.gstatic.com'
+    ],
+    'style-src': [
+        '\'self\'',
+        '\'unsafe-inline\'',  # Allows inline styles
+        'https://fonts.googleapis.com',
+        'https://cdn.jsdelivr.net'
+    ],
+    'script-src': [
+        '\'self\'',
+        '\'unsafe-inline\'',  # Allows inline scripts
+        'https://code.jquery.com',
+        'https://cdn.jsdelivr.net'
     ]
 }
 # HTTP Strict Transport Security (HSTS) Header
