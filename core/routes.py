@@ -308,8 +308,23 @@ def setup_routes(app, oauth):
     @app.route('/logout')
     @login_required
     def logout():
-        logout_vk()
-        logout_user()
-        session.clear()
+        try:
+            current_app.logger.debug("Initiating VK logout.")
+            logout_vk()
+        except Exception as e:
+            current_app.logger.error(f"VK logout failed: {e}")
+
+        try:
+            current_app.logger.debug("Logging out user.")
+            logout_user()
+        except Exception as e:
+            current_app.logger.error(f"User logout failed: {e}")
+
+        try:
+            current_app.logger.debug("Clearing session data.")
+            session.clear()
+        except Exception as e:
+            current_app.logger.error(f"Session clearing failed: {e}")
+
         current_app.logger.debug(f"User logged out successfully.")
         return redirect(url_for('index'))
