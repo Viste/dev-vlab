@@ -1,7 +1,7 @@
 import logging
 
 import requests
-from flask import render_template, redirect, url_for, request, flash, session, current_app
+from flask import render_template, redirect, url_for, request, flash, session, current_app, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
 from telethon import TelegramClient
 
@@ -138,57 +138,46 @@ def setup_routes(app, oauth):
     @app.route('/login/telegram', methods=['GET', 'POST'])
     async def login_telegram():
         if request.method == 'POST':
-            phone_number = request.form['phone']
-            session['phone_number'] = phone_number
+            phone_number = request.form.get('phone')
+            code = request.form.get('code')
 
             client = TelegramClient('session_name', api_id, api_hash)
             await client.connect()
 
-            if not await client.is_user_authorized():
-                await client.send_code_request(phone_number)
-                return redirect(url_for('enter_telegram_code'))
+            if phone_number:
+                session['phone_number'] = phone_number
+
+                try:
+                    await client.send_code_request(phone_number)
+                    return jsonify({'success': True})
+                except Exception as e:
+                    return jsonify({'success': False, 'message': 'Ошибка при отправке кода. Попробуйте снова.'})
+
+            if code:
+                phone_number = session.get('phone_number')
+
+                try:
+                    await client.sign_in(phone_number, code)
+                    user_info = await client.get_me()
+                    user = User.query.filter_by(telegram_id=user_info.id).first()
+
+                    if not user:
+                        username = user_info.username if user_info.username else f"telegram_{user_info.id}"
+                        user = User(username=username, telegram_id=user_info.id, first_name=user_info.first_name, last_name=user_info.last_name)
+                        db.session.add(user)
+                        db.session.commit()
+
+                    session['loggedin'] = True
+                    session['id'] = user.id
+                    session['username'] = user.username
+                    login_user(user)
+
+                    await client.disconnect()
+                    return jsonify({'success': True})
+                except Exception as e:
+                    return jsonify({'success': False, 'message': 'Ошибка при аутентификации. Проверьте код и попробуйте снова.'})
 
         return render_template('auth/login_telegram.html')
-
-    @app.route('/login/telegram/code', methods=['GET', 'POST'])
-    async def enter_telegram_code():
-        if request.method == 'POST':
-            code = request.form['code']
-            phone_number = session.get('phone_number')
-
-            client = TelegramClient('session_name', api_id, api_hash)
-            await client.connect()
-
-            try:
-                await client.sign_in(phone_number, code)
-
-                user_info = await client.get_me()
-                user = User.query.filter_by(telegram_id=user_info.id).first()
-
-                if not user:
-                    username = user_info.username if user_info.username else f"telegram_{user_info.id}"
-                    user = User(
-                        username=username,
-                        telegram_id=user_info.id,
-                        first_name=user_info.first_name,
-                        last_name=user_info.last_name,
-                    )
-                    db.session.add(user)
-                    db.session.commit()
-
-                session['loggedin'] = True
-                session['id'] = user.id
-                session['username'] = user.username
-                login_user(user)
-
-                await client.disconnect()
-                return redirect(url_for('index'))
-
-            except Exception as e:
-                flash('Failed to authenticate via Telegram. Please check the code and try again.', 'danger')
-                return redirect(url_for('login_telegram'))
-
-        return render_template('auth/enter_telegram_code.html')
 
     @app.route('/login/vk')
     def login_vk():
