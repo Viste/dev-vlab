@@ -27,7 +27,7 @@ class MyAdminIndexView(AdminIndexView):
             return redirect(url_for('admin.login_view'))
         return super(MyAdminIndexView, self).index()
 
-    @admin.expose('/login/', methods=('GET', 'POST'))
+    @admin.expose('/admin_login/', methods=('GET', 'POST'))
     def login_view(self):
         form = LoginForm(request.form)
         if admin.helpers.validate_form_on_submit(form):
@@ -39,7 +39,7 @@ class MyAdminIndexView(AdminIndexView):
         self._template_args['form'] = form
         return super(MyAdminIndexView, self).render('admin/login.html')
 
-    @admin.expose('/logout/')
+    @admin.expose('/admin_logout/')
     def logout_view(self):
         logout_user()
         session.clear()
