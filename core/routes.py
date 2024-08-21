@@ -16,6 +16,7 @@ logging.getLogger('sqlalchemy.engine').setLevel(logging.DEBUG)
 logging.getLogger('sqlalchemy.pool').setLevel(logging.DEBUG)
 logging.getLogger('sqlalchemy.dialects').setLevel(logging.DEBUG)
 
+telegram_client = None
 
 def setup_routes(app, oauth):
     oauth.init_app(app)
@@ -134,33 +135,30 @@ def setup_routes(app, oauth):
 
     @app.route('/login/telegram', methods=['GET', 'POST'])
     def login_telegram():
+        global telegram_client
         if request.method == 'POST':
             phone_number = request.form['phone']
             session['phone_number'] = phone_number  # Сохраняем номер телефона в сессии
 
-            client = TelegramClient('session_name', Config.TELEGRAM_API_ID, Config.TELEGRAM_API_HASH)
-            client.connect()
+            telegram_client = TelegramClient('session_name', Config.TELEGRAM_API_ID, Config.TELEGRAM_API_HASH)
+            telegram_client.connect()
 
-            if not client.is_user_authorized():
-                client.send_code_request(phone_number)
-                session['client'] = client.session.save()  # Сохраняем сессию клиента
-
+            if not telegram_client.is_user_authorized():
+                telegram_client.send_code_request(phone_number)
                 return redirect(url_for('enter_telegram_code'))  # Перенаправляем на страницу ввода кода
 
         return render_template('auth/login_telegram.html')
 
     @app.route('/login/telegram/code', methods=['GET', 'POST'])
     def enter_telegram_code():
+        global telegram_client
         if request.method == 'POST':
             code = request.form['code']
-            client = TelegramClient('session_name', Config.TELEGRAM_API_ID, Config.TELEGRAM_API_HASH)
-            client.connect()
-            client.session.load(session['client'])
 
             try:
-                client.sign_in(session['phone_number'], code)
+                telegram_client.sign_in(session['phone_number'], code)
 
-                user_info = client.get_me()
+                user_info = telegram_client.get_me()
                 user = User.query.filter_by(telegram_id=user_info.id).first()
 
                 if not user:
@@ -179,7 +177,7 @@ def setup_routes(app, oauth):
                 session['username'] = user.username
                 login_user(user)
 
-                client.disconnect()
+                telegram_client.disconnect()
                 return redirect(url_for('index'))
 
             except Exception as e:
