@@ -85,3 +85,19 @@ class User(db.Model, UserMixin):
         except:
             return None
         return User.query.get(user_id)
+
+    @property
+    def is_authenticated(self):
+        return True
+
+    @property
+    def is_active(self):
+        # пользователь активен, если он не забанен.
+        return not self.is_banned
+
+    @property
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return str(self.id)

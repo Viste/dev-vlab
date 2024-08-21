@@ -1,0 +1,12 @@
+.star-rating input[type="radio"] {
+    display: none;
+}
+
+.star-rating label {
+    color: grey;
+    font-size: 30px;
+}
+
+.star-rating input[type="radio"]:checked ~ label {
+    color: gold;
+}

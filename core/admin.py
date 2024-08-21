@@ -4,13 +4,16 @@ from flask_admin import AdminIndexView
 from flask_admin.contrib.sqla import ModelView
 from flask_login import login_user, logout_user, current_user, login_required
 
-from database.models import BlogPost, Project, NavigationLink
+from database.models import BlogPost, Project, NavigationLink, User
 from tools.forms import LoginForm
 
 
 class MyModelView(ModelView):
     def is_accessible(self):
         return current_user.is_authenticated
+
+    def is_admin(self):
+        return current_user.is_admin
 
     def inaccessible_callback(self, name, **kwargs):
         return redirect(url_for('login', next=request.url))
@@ -48,4 +51,5 @@ def setup_admin(app, db):
     admins.add_view(MyModelView(BlogPost, db.session))
     admins.add_view(MyModelView(Project, db.session))
     admins.add_view(MyModelView(NavigationLink, db.session))
+    admins.add_view(MyModelView(User, db.session))
     return admin

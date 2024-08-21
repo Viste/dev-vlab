@@ -49,6 +49,7 @@ def setup_routes(app, oauth):
         return render_template('blog/blog.html', posts=posts)
 
     @app.route('/blog/<int:post_id>')
+    @login_required
     def view_post(post_id):
         post = BlogPost.query.get_or_404(post_id)
         return render_template('blog/view_post.html', post=post)
@@ -99,6 +100,7 @@ def setup_routes(app, oauth):
         return render_template('auth/register.html')
 
     @app.route('/reset_password', methods=['GET', 'POST'])
+    @login_required
     def reset_password():
         if request.method == 'POST':
             username = request.form['username']
@@ -113,6 +115,7 @@ def setup_routes(app, oauth):
         return render_template('auth/change_password.html')
 
     @app.route('/reset_password/<token>', methods=['GET', 'POST'])
+    @login_required
     def reset_password_token(token):
         user = User.verify_reset_token(token)
         if not user:
