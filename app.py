@@ -91,8 +91,7 @@ talisman.strict_transport_security = hsts
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
-    # Устанавливаем webhook для бота
     asyncio.run(bot.set_webhook(url="https://dev-vlab.ru/webhook"))
 
-    # Запускаем веб-сервер Flask и aiogram
-    web.run_app(setup_application(app, SimpleRequestHandler(dispatcher=dp, bot=bot)), host="0.0.0.0", port=8000)
+    web.run_app(
+        setup_application(app, SimpleRequestHandler(dispatcher=dp, bot=bot)), host="0.0.0.0", port=8000)
