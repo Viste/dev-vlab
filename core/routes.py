@@ -3,7 +3,7 @@ import logging
 import requests
 from flask import render_template, redirect, url_for, request, flash, session, current_app, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
-from telethon import TelegramClient
+from telethon import TelegramClient, errors
 
 from database.models import db, Project, BlogPost, NavigationLink, User, Comment
 from tools.auth import authenticate_user, authenticate_vk_user
@@ -146,24 +146,30 @@ def setup_routes(app, oauth):
 
             if phone_number:
                 session['phone_number'] = phone_number
-
                 try:
                     await client.send_code_request(phone_number)
                     return jsonify({'success': True})
+                except errors.PhoneNumberInvalidError:
+                    return jsonify({'success': False, 'message': 'Неправильный номер телефона. Попробуйте снова.'})
                 except Exception as e:
+                    logging.error(f'Error sending code: {e}')
                     return jsonify({'success': False, 'message': 'Ошибка при отправке кода. Попробуйте снова.'})
 
             if code:
                 phone_number = session.get('phone_number')
-
                 try:
                     await client.sign_in(phone_number, code)
                     user_info = await client.get_me()
-                    user = User.query.filter_by(telegram_id=user_info.id).first()
 
+                    user = User.query.filter_by(telegram_id=user_info.id).first()
                     if not user:
                         username = user_info.username if user_info.username else f"telegram_{user_info.id}"
-                        user = User(username=username, telegram_id=user_info.id, first_name=user_info.first_name, last_name=user_info.last_name)
+                        user = User(
+                            username=username,
+                            telegram_id=user_info.id,
+                            first_name=user_info.first_name,
+                            last_name=user_info.last_name,
+                        )
                         db.session.add(user)
                         db.session.commit()
 
@@ -174,7 +180,15 @@ def setup_routes(app, oauth):
 
                     await client.disconnect()
                     return jsonify({'success': True})
+
+                except errors.SessionPasswordNeededError:
+                    return jsonify({'success': False, 'message': 'Для входа требуется пароль.'})
+                except errors.PhoneCodeInvalidError:
+                    return jsonify({'success': False, 'message': 'Неправильный код подтверждения. Попробуйте снова.'})
+                except errors.PhoneCodeExpiredError:
+                    return jsonify({'success': False, 'message': 'Код подтверждения устарел. Запросите новый код.'})
                 except Exception as e:
+                    logging.error(f'Error during authentication: {e}')
                     return jsonify({'success': False, 'message': 'Ошибка при аутентификации. Проверьте код и попробуйте снова.'})
 
         return render_template('auth/login_telegram.html')
