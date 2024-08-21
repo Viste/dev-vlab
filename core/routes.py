@@ -3,7 +3,7 @@ import logging
 import requests
 from flask import render_template, redirect, url_for, request, flash, session, current_app
 from flask_login import login_user, logout_user, login_required, current_user
-from telethon.sync import TelegramClient
+from telethon import TelegramClient
 
 from database.models import db, Project, BlogPost, NavigationLink, User, Comment
 from tools.auth import authenticate_user, authenticate_vk_user
@@ -16,7 +16,8 @@ logging.getLogger('sqlalchemy.engine').setLevel(logging.DEBUG)
 logging.getLogger('sqlalchemy.pool').setLevel(logging.DEBUG)
 logging.getLogger('sqlalchemy.dialects').setLevel(logging.DEBUG)
 
-telegram_client = None
+api_id = Config.TELEGRAM_API_ID
+api_hash = Config.TELEGRAM_API_HASH
 
 
 def setup_routes(app, oauth):
@@ -135,33 +136,39 @@ def setup_routes(app, oauth):
         return render_template('auth/reset_password_token.html')
 
     @app.route('/login/telegram', methods=['GET', 'POST'])
-    def login_telegram():
-        global telegram_client
+    async def login_telegram():
         if request.method == 'POST':
             phone_number = request.form['phone']
-            session['phone_number'] = phone_number  # Сохраняем номер телефона в сессии
+            session['phone_number'] = phone_number
 
-            telegram_client = TelegramClient('session_name', Config.TELEGRAM_API_ID, Config.TELEGRAM_API_HASH)
-            telegram_client.connect()
+            # Создаем асинхронный клиент Telethon
+            client = TelegramClient('session_name', api_id, api_hash)
+            await client.connect()
 
-            if not telegram_client.is_user_authorized():
-                telegram_client.send_code_request(phone_number)
-                return redirect(url_for('enter_telegram_code'))  # Перенаправляем на страницу ввода кода
+            if not await client.is_user_authorized():
+                await client.send_code_request(phone_number)
+                session['telegram_client'] = client.session.save()
+
+                return redirect(url_for('enter_telegram_code'))
 
         return render_template('auth/login_telegram.html')
 
     @app.route('/login/telegram/code', methods=['GET', 'POST'])
-    def enter_telegram_code():
-        global telegram_client
+    async def enter_telegram_code():
         if request.method == 'POST':
             code = request.form['code']
 
-            try:
-                telegram_client.sign_in(session['phone_number'], code)
+            # Восстанавливаем сессию клиента
+            client = TelegramClient('session_name', api_id, api_hash)
+            await client.connect()
+            client.session.load(session['telegram_client'])
 
-                user_info = telegram_client.get_me()
+            try:
+                await client.sign_in(session['phone_number'], code)
+
+                user_info = await client.get_me()
                 user = User.query.filter_by(telegram_id=user_info.id).first()
-                current_app.logger.debug(f"TG login initiated. BEFORE if not  USER")
+
                 if not user:
                     username = user_info.username if user_info.username else f"telegram_{user_info.id}"
                     user = User(
@@ -176,10 +183,9 @@ def setup_routes(app, oauth):
                 session['loggedin'] = True
                 session['id'] = user.id
                 session['username'] = user.username
-                current_app.logger.debug(f"TG login initiated. BEFORE LOGIN USER")
                 login_user(user)
 
-                telegram_client.disconnect()
+                await client.disconnect()
                 return redirect(url_for('index'))
 
             except Exception as e:
