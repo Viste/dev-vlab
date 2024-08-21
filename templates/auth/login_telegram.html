@@ -11,7 +11,7 @@
         <h2>Войти через Telegram</h2>
         <form method="POST" action="{{ url_for('login_telegram') }}">
             <div class="form-group">
-                <label for="phone">Номер телефона</label>
+                <label for="phone">Укажи номер телефона на который зарегистрирован твой аккаунт телеграмм</label>
                 <input type="text" class="form-control" id="phone" name="phone" placeholder="Введите ваш номер телефона">
             </div>
             <button type="submit" class="btn btn-primary mt-3">Получить код</button>
