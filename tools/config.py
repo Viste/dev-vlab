@@ -16,6 +16,8 @@ class Config:
     # VKontakte OAuth configuration
     VK_CLIENT_ID = os.getenv('VK_CLIENT_ID')
     VK_CLIENT_SECRET = os.getenv('VK_CLIENT_SECRET')
+    TELEGRAM_API_ID = os.getenv('TELEGRAM_API_ID')
+    TELEGRAM_API_HASH = os.getenv('TELEGRAM_API_HASH')
     SESSION_TYPE = 'redis'
     SESSION_PERMANENT = False
     SESSION_USE_SIGNER = True

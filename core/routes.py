@@ -1,11 +1,11 @@
 import logging
 
 import requests
-from flask import render_template, redirect, url_for, request, flash, jsonify, session, current_app
+from flask import render_template, redirect, url_for, request, flash, session, current_app
 from flask_login import login_user, logout_user, login_required, current_user
 
 from database.models import db, Project, BlogPost, NavigationLink, User, Comment
-from tools.auth import authenticate_user, authenticate_vk_user
+from tools.auth import authenticate_user, authenticate_vk_user, authenticate_telegram_user
 from tools.config import Config
 from tools.utils import generate_code_verifier, generate_code_challenge
 
@@ -79,30 +79,6 @@ def setup_routes(app, oauth):
 
         return render_template('auth/login.html')
 
-    @app.route('/update_telegram_profile', methods=['POST'])
-    def update_telegram_profile():
-        data = request.json
-        telegram_id = data.get('telegram_id')
-        username = data.get('username')
-        first_name = data.get('first_name')
-        last_name = data.get('last_name')
-        profile_picture = data.get('profile_picture')
-
-        user = User.query.filter_by(telegram_id=telegram_id).first()
-        if user:
-            user.username = username
-            user.first_name = first_name
-            user.last_name = last_name
-            user.profile_picture = profile_picture
-            current_app.logger.debug(f"Updated Telegram profile for user {username}.")
-        else:
-            user = User(telegram_id=telegram_id, username=username, first_name=first_name, last_name=last_name, profile_picture=profile_picture, provider='telegram')
-            db.session.add(user)
-            current_app.logger.debug(f"Created new Telegram user {username}.")
-
-        db.session.commit()
-        return jsonify({"status": "success"}), 200
-
     @app.route('/register', methods=['GET', 'POST'])
     def register():
         if request.method == 'POST':
@@ -151,6 +127,20 @@ def setup_routes(app, oauth):
             current_app.logger.debug(f"Password updated for username {user.username}.")
             return redirect(url_for('login'))
         return render_template('auth/reset_password_token.html')
+
+    @app.route('/login/telegram', methods=['GET', 'POST'])
+    def login_telegram():
+        if request.method == 'POST':
+            phone_number = request.form['phone']
+            if authenticate_telegram_user(phone_number, Config.TELEGRAM_API_ID, Config.TELEGRAM_API_HASH):
+                next_page = request.args.get('next')
+                return redirect(next_page) if next_page else redirect(url_for('index'))
+            else:
+                flash('Failed to authenticate via Telegram.', 'danger')
+                return redirect(url_for('login_telegram'))
+
+        return render_template('auth/login_telegram.html')
+
 
     @app.route('/login/vk')
     def login_vk():
