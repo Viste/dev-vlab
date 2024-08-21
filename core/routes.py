@@ -18,6 +18,7 @@ logging.getLogger('sqlalchemy.dialects').setLevel(logging.DEBUG)
 
 telegram_client = None
 
+
 def setup_routes(app, oauth):
     oauth.init_app(app)
     vk = oauth.register(
@@ -160,7 +161,7 @@ def setup_routes(app, oauth):
 
                 user_info = telegram_client.get_me()
                 user = User.query.filter_by(telegram_id=user_info.id).first()
-
+                current_app.logger.debug(f"TG login initiated. BEFORE if not  USER")
                 if not user:
                     username = user_info.username if user_info.username else f"telegram_{user_info.id}"
                     user = User(
@@ -175,6 +176,7 @@ def setup_routes(app, oauth):
                 session['loggedin'] = True
                 session['id'] = user.id
                 session['username'] = user.username
+                current_app.logger.debug(f"TG login initiated. BEFORE LOGIN USER")
                 login_user(user)
 
                 telegram_client.disconnect()
