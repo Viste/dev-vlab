@@ -66,8 +66,10 @@ def authenticate_telegram_user(phone_number, api_id, api_hash):
         user = User.query.filter_by(telegram_id=user_info.id).first()
 
         if not user:
+            # Если у пользователя нет username, создаем его на основе других данных
+            username = user_info.username if user_info.username else f"telegram_{user_info.id}"
             user = User(
-                username=user_info.username,
+                username=username,
                 telegram_id=user_info.id,
                 first_name=user_info.first_name,
                 last_name=user_info.last_name,
