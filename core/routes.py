@@ -3,9 +3,10 @@ import logging
 import requests
 from flask import render_template, redirect, url_for, request, flash, session, current_app
 from flask_login import login_user, logout_user, login_required, current_user
+from telethon.sync import TelegramClient
 
 from database.models import db, Project, BlogPost, NavigationLink, User, Comment
-from tools.auth import authenticate_user, authenticate_vk_user, authenticate_telegram_user
+from tools.auth import authenticate_user, authenticate_vk_user
 from tools.config import Config
 from tools.utils import generate_code_verifier, generate_code_challenge
 
@@ -135,15 +136,57 @@ def setup_routes(app, oauth):
     def login_telegram():
         if request.method == 'POST':
             phone_number = request.form['phone']
-            if authenticate_telegram_user(phone_number, Config.TELEGRAM_API_ID, Config.TELEGRAM_API_HASH):
-                next_page = request.args.get('next')
-                return redirect(next_page) if next_page else redirect(url_for('index'))
-            else:
-                flash('Failed to authenticate via Telegram.', 'danger')
-                return redirect(url_for('login_telegram'))
+            session['phone_number'] = phone_number  # Сохраняем номер телефона в сессии
+
+            client = TelegramClient('session_name', Config.TELEGRAM_API_ID, Config.TELEGRAM_API_HASH)
+            client.connect()
+
+            if not client.is_user_authorized():
+                client.send_code_request(phone_number)
+                session['client'] = client.session.save()  # Сохраняем сессию клиента
+
+                return redirect(url_for('enter_telegram_code'))  # Перенаправляем на страницу ввода кода
 
         return render_template('auth/login_telegram.html')
 
+    @app.route('/login/telegram/code', methods=['GET', 'POST'])
+    def enter_telegram_code():
+        if request.method == 'POST':
+            code = request.form['code']
+            client = TelegramClient('session_name', Config.TELEGRAM_API_ID, Config.TELEGRAM_API_HASH)
+            client.connect()
+            client.session.load(session['client'])
+
+            try:
+                client.sign_in(session['phone_number'], code)
+
+                user_info = client.get_me()
+                user = User.query.filter_by(telegram_id=user_info.id).first()
+
+                if not user:
+                    username = user_info.username if user_info.username else f"telegram_{user_info.id}"
+                    user = User(
+                        username=username,
+                        telegram_id=user_info.id,
+                        first_name=user_info.first_name,
+                        last_name=user_info.last_name,
+                    )
+                    db.session.add(user)
+                    db.session.commit()
+
+                session['loggedin'] = True
+                session['id'] = user.id
+                session['username'] = user.username
+                login_user(user)
+
+                client.disconnect()
+                return redirect(url_for('index'))
+
+            except Exception as e:
+                flash('Failed to authenticate via Telegram. Please check the code and try again.', 'danger')
+                return redirect(url_for('login_telegram'))
+
+        return render_template('auth/enter_telegram_code.html')
 
     @app.route('/login/vk')
     def login_vk():

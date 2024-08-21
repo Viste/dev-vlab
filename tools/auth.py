@@ -1,7 +1,6 @@
 from flask import current_app
 from flask import session
 from flask_login import LoginManager, login_user, logout_user
-from telethon.sync import TelegramClient
 from werkzeug.security import check_password_hash
 
 from database.models import User
@@ -50,44 +49,6 @@ def authenticate_vk_user(vk_id, user_name, first_name, last_name, email):
     login_user(user)
     current_app.logger.debug(f"User {user.username} authenticated and logged in")
     return True
-
-
-def authenticate_telegram_user(phone_number, api_id, api_hash):
-    client = TelegramClient('session_name', api_id, api_hash)
-
-    try:
-        client.connect()
-        if not client.is_user_authorized():
-            client.send_code_request(phone_number)
-            code = input('Enter the code you received: ')
-            client.sign_in(phone_number, code)
-
-        user_info = client.get_me()
-        user = User.query.filter_by(telegram_id=user_info.id).first()
-
-        if not user:
-            # Если у пользователя нет username, создаем его на основе других данных
-            username = user_info.username if user_info.username else f"telegram_{user_info.id}"
-            user = User(
-                username=username,
-                telegram_id=user_info.id,
-                first_name=user_info.first_name,
-                last_name=user_info.last_name,
-            )
-            db.session.add(user)
-            db.session.commit()
-
-        session['loggedin'] = True
-        session['id'] = user.id
-        session['username'] = user.username
-        login_user(user)
-
-        client.disconnect()
-        return True
-
-    except Exception as e:
-        current_app.logger.error(f"Failed to authenticate via Telegram. Error: {e}")
-        return False
 
 
 def logout():
