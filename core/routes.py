@@ -134,6 +134,10 @@ def setup_routes(app, oauth):
             return redirect(url_for('login'))
         return render_template('auth/reset_password_token.html')
 
+    @app.route('/login/telegram', methods=['GET', 'POST'])
+    def login_telegram():
+        return redirect(f"https://telegram.me/stalinfollower_bot?start=auth")
+
     @app.route('/api/telegram_user', methods=['POST'])
     @token_required
     def telegram_user():
