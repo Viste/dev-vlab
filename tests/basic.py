@@ -1,28 +1,21 @@
 import pytest
 from flask import url_for
 
-from app import db
+from app import app, db
 from database.models import User, BlogPost, Comment
 
 
 @pytest.fixture
-def app():
-    app = create_app('testing')
+def client():
+    app.config['TESTING'] = True
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
     with app.app_context():
         db.create_all()
-        yield app
+        yield app.test_client()
         db.session.remove()
         db.drop_all()
-
-
-@pytest.fixture
-def client(app):
-    return app.test_client()
-
-
-@pytest.fixture
-def runner(app):
-    return app.test_cli_runner()
 
 
 @pytest.fixture
