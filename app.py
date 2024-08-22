@@ -1,4 +1,3 @@
-import asyncio
 import logging
 
 from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
@@ -88,10 +87,16 @@ talisman.frame_options_allow_from = 'https://www.google.com'
 talisman.content_security_policy = csp
 talisman.strict_transport_security = hsts
 
+
+async def create_app():
+    # Настройка webhook для бота
+    await bot.set_webhook(url="https://dev-vlab.ru/webhook")
+
+    aiohttp_app = setup_application(app, SimpleRequestHandler(dispatcher=dp, bot=bot))
+
+    return aiohttp_app
+
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-
-    asyncio.run(bot.set_webhook(url="https://dev-vlab.ru/webhook"))
-
-    web.run_app(
-        setup_application(app, SimpleRequestHandler(dispatcher=dp, bot=bot)), host="0.0.0.0", port=8000)
+    web.run_app(create_app(), host="0.0.0.0", port=8000)
