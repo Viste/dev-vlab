@@ -139,7 +139,7 @@ def setup_routes(app, oauth):
         return redirect(f"https://telegram.me/stalinfollower_bot?start=auth")
 
     @app.route('/api/telegram_user', methods=['POST'])
-    @token_required
+    @token_required  # Добавляем защиту эндпоинта
     def telegram_user():
         data = request.json
         telegram_id = data.get('telegram_id')
@@ -148,15 +148,13 @@ def setup_routes(app, oauth):
         last_name = data.get('last_name')
 
         user = User.query.filter_by(telegram_id=telegram_id).first()
+
         if not user:
             user = User(telegram_id=telegram_id, username=username, first_name=first_name, last_name=last_name, provider='telegram')
             db.session.add(user)
-        else:
-            user.username = username
-            user.first_name = first_name
-            user.last_name = last_name
+            db.session.commit()
 
-        db.session.commit()
+        login_user(user)
 
         return jsonify({"status": "success", "user_id": user.id}), 200
 
