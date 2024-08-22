@@ -29,5 +29,5 @@ pytest-mock
 requests
 redis
 telethon
-aiogram
 aiohttp
+jwt

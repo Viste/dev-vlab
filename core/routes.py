@@ -1,17 +1,13 @@
 import logging
-import os
 
 import requests
-from aiogram import Bot, Dispatcher, types
-from aiogram.filters import CommandStart
-from aiogram.fsm.storage.memory import MemoryStorage
-from flask import render_template, redirect, url_for, request, flash, session, current_app
+from flask import render_template, redirect, url_for, request, flash, session, current_app, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
 
 from database.models import db, Project, BlogPost, NavigationLink, User, Comment
 from tools.auth import authenticate_user, authenticate_vk_user
 from tools.config import Config
-from tools.utils import generate_code_verifier, generate_code_challenge
+from tools.utils import generate_code_verifier, generate_code_challenge, token_required
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -21,54 +17,6 @@ logging.getLogger('sqlalchemy.dialects').setLevel(logging.DEBUG)
 
 api_id = Config.TELEGRAM_API_ID
 api_hash = Config.TELEGRAM_API_HASH
-
-TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
-bot = Bot(token=TELEGRAM_BOT_TOKEN)
-dp = Dispatcher(storage=MemoryStorage())
-
-
-@dp.message(CommandStart())
-async def start_handler(message: types.Message):
-    if 'auth' in message.text:
-        telegram_user_data = {
-            'telegram_id': str(message.from_user.id),
-            'username': message.from_user.username,
-            'first_name': message.from_user.first_name,
-            'last_name': message.from_user.last_name
-        }
-
-        user = User.query.filter_by(telegram_id=telegram_user_data['telegram_id']).first()
-        if not user:
-            user = User(
-                telegram_id=telegram_user_data['telegram_id'],
-                username=telegram_user_data['username'],
-                first_name=telegram_user_data['first_name'],
-                last_name=telegram_user_data['last_name'],
-                provider='telegram'
-            )
-            db.session.add(user)
-        else:
-            user.username = telegram_user_data['username']
-            user.first_name = telegram_user_data['first_name']
-            user.last_name = telegram_user_data['last_name']
-
-        db.session.commit()
-
-        # Авторизация пользователя через Flask-Login
-        login_user(user)
-
-        session['telegram_user'] = {
-            'id': user.id,
-            'telegram_id': user.telegram_id,
-            'first_name': user.first_name,
-            'last_name': user.last_name,
-            'username': user.username
-        }
-
-        await message.answer("Вы успешно авторизовались через Telegram!")
-        await message.answer("Теперь вы можете вернуться на сайт.")
-    else:
-        await message.answer("Привет! Используйте /start auth для авторизации.")
 
 
 def setup_routes(app, oauth):
@@ -186,16 +134,27 @@ def setup_routes(app, oauth):
             return redirect(url_for('login'))
         return render_template('auth/reset_password_token.html')
 
-    # Маршрут для вебхуков
-    @app.route('/webhook', methods=['POST'])
-    async def webhook():
-        update = types.Update(**request.json)
-        await dp.feed_update(bot, update)
-        return "!", 200
+    @app.route('/api/telegram_user', methods=['POST'])
+    @token_required
+    def telegram_user():
+        data = request.json
+        telegram_id = data.get('telegram_id')
+        username = data.get('username')
+        first_name = data.get('first_name')
+        last_name = data.get('last_name')
 
-    @app.route('/login/telegram', methods=['GET', 'POST'])
-    def login_telegram():
-        return redirect(f"https://telegram.me/dev_vlab_bot?start=auth")
+        user = User.query.filter_by(telegram_id=telegram_id).first()
+        if not user:
+            user = User(telegram_id=telegram_id, username=username, first_name=first_name, last_name=last_name, provider='telegram')
+            db.session.add(user)
+        else:
+            user.username = username
+            user.first_name = first_name
+            user.last_name = last_name
+
+        db.session.commit()
+
+        return jsonify({"status": "success", "user_id": user.id}), 200
 
     @app.route('/login/vk')
     def login_vk():
