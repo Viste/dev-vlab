@@ -30,4 +30,4 @@ requests
 redis
 telethon
 aiohttp
-jwt
+PyJWT
