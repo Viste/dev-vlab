@@ -1,8 +1,16 @@
+from unittest.mock import patch
+
 import pytest
 from flask import url_for
 
 from app import app, db
 from database.models import User, BlogPost, Comment
+
+
+@pytest.fixture(autouse=True)
+def mock_bot():
+    with patch("core.routes.bot"):
+        yield
 
 
 @pytest.fixture
