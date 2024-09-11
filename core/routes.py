@@ -3,7 +3,7 @@ import json
 import logging
 
 import requests
-from flask import render_template, redirect, url_for, request, flash, session, current_app, jsonify
+from flask import render_template, redirect, url_for, request, flash, session, current_app, jsonify, Markup
 from flask_login import login_user, logout_user, login_required, current_user
 
 from database.models import db, Project, BlogPost, NavigationLink, User, Comment
@@ -57,6 +57,7 @@ def setup_routes(app, oauth):
     @login_required
     def view_post(post_id):
         post = BlogPost.query.get_or_404(post_id)
+        post.content = Markup(post.content)
         return render_template('blog/view_post.html', post=post)
 
     @app.route('/add_comment/<int:post_id>', methods=['POST'])

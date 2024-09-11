@@ -4,9 +4,14 @@ import os
 from functools import wraps
 
 import jwt
+import markdown
 from flask import request, jsonify
 
 from tools.config import Config
+
+
+def markdown_format(text):
+    return markdown.markdown(text, extensions=['extra', 'smarty'])
 
 
 def generate_jwt():
