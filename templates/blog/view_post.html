@@ -39,7 +39,7 @@
 <body>
 <div class="container mt-4">
     <h1>{{ post.title }}</h1>
-    <p>{{ post.content }}</p>
+    <p>{{ post.content|safe }}</p>
     <hr>
     <h6>Comments:</h6>
     <ul class="list-group">
