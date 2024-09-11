@@ -3,8 +3,9 @@ import json
 import logging
 
 import requests
-from flask import render_template, redirect, url_for, request, flash, session, current_app, jsonify, Markup
+from flask import render_template, redirect, url_for, request, flash, session, current_app, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
+from markupsafe import Markup
 
 from database.models import db, Project, BlogPost, NavigationLink, User, Comment
 from tools.auth import authenticate_user, authenticate_vk_user
