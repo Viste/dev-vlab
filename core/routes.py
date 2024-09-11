@@ -141,7 +141,7 @@ def setup_routes(app, oauth):
         telegram_auth_url = (
             f"https://oauth.telegram.org/auth"
             f"?bot_id={api_id}"
-            f"&origin={url_for('main.oauth_callback', _external=True)}"
+            f"&origin={url_for('oauth_callback', _external=True)}"
             f"&request_id=1"
             f"&only_web=True"
         )
