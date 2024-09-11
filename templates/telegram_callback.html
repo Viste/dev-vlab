@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Processing Telegram Authentication..{% endblock %}
+
+{% block content %}
+<body>
+    <div>
+        <div class="loader"></div>
+        <h2>Processing Telegram Authentication...</h2>
+    </div>
+    <script>
+        window.onload = function () {
+            console.log("Page loaded, processing the hash...");
+            const urlHash = window.location.hash;
+            console.log("URL Hash: ", urlHash);
+
+            if (urlHash.startsWith("#tgAuthResult")) {
+                const authResult = urlHash.substring(14);
+                console.log("Extracted Auth Result: ", authResult);
+                const redirectUrl = `/oauth/telegram/complete?tgAuthResult=${encodeURIComponent(authResult)}`;
+                console.log("Redirecting to: ", redirectUrl);
+                window.location.href = redirectUrl;
+            } else {
+                console.log("No tgAuthResult found in the URL hash.");
+            }
+        };
+    </script>
+</body>
+{% endblock %}

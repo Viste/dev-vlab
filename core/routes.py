@@ -1,3 +1,5 @@
+import base64
+import json
 import logging
 
 import requests
@@ -7,7 +9,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from database.models import db, Project, BlogPost, NavigationLink, User, Comment
 from tools.auth import authenticate_user, authenticate_vk_user
 from tools.config import Config
-from tools.utils import generate_code_verifier, generate_code_challenge, token_required
+from tools.utils import generate_code_verifier, generate_code_challenge
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -134,29 +136,56 @@ def setup_routes(app, oauth):
             return redirect(url_for('login'))
         return render_template('auth/reset_password_token.html')
 
-    @app.route('/login/telegram', methods=['GET', 'POST'])
-    def login_telegram():
-        return redirect(f"https://telegram.me/stalinfollower_bot?start=auth")
+    @app.route('/oauth/telegram', methods=['GET'])
+    def oauth_telegram():
+        telegram_auth_url = (
+            f"https://oauth.telegram.org/auth"
+            f"?bot_id={api_id}"
+            f"&origin={url_for('main.oauth_callback', _external=True)}"
+            f"&request_id=1"
+            f"&only_web=True"
+        )
+        return redirect(telegram_auth_url)
 
-    @app.route('/api/telegram_user', methods=['POST'])
-    @token_required  # Добавляем защиту эндпоинта
-    def telegram_user():
-        data = request.json
-        telegram_id = data.get('telegram_id')
-        username = data.get('username')
-        first_name = data.get('first_name')
-        last_name = data.get('last_name')
+    @app.route('/oauth/telegram/callback', methods=['GET'])
+    def oauth_callback():
+        current_app.logger.debug("Rendering telegram_callback.html")
+        return render_template('telegram_callback.html')
+
+    @app.route('/oauth/telegram/complete', methods=['GET', 'POST'])
+    def oauth_complete():
+        tg_auth_result = request.args.get('tgAuthResult')
+
+        if not tg_auth_result:
+            current_app.logger.debug("tgAuthResult not found. Request args: {}".format(request.args))
+            return jsonify({'success': False, 'message': 'Не удалось получить данные авторизации.'})
+
+        try:
+            decoded_auth_result = base64.urlsafe_b64decode(tg_auth_result + '=' * (-len(tg_auth_result) % 4)).decode('utf-8')
+            user_info = json.loads(decoded_auth_result)
+            current_app.logger.debug("Parsed user_info: {}".format(user_info))
+        except Exception as e:
+            current_app.logger.debug(f"Error parsing tgAuthResult: {e}")
+            return jsonify({'success': False, 'message': 'Ошибка при парсинге данных авторизации.'})
+
+        telegram_id = user_info.get('id')
+        first_name = user_info.get('first_name')
+        username = user_info.get('username', f"telegram_{telegram_id}")
 
         user = User.query.filter_by(telegram_id=telegram_id).first()
 
         if not user:
-            user = User(telegram_id=telegram_id, username=username, first_name=first_name, last_name=last_name, provider='telegram')
+            user = User(username=username, telegram_id=telegram_id, first_name=first_name, last_name=user_info.get('last_name'), phone_number=user_info.get('phone'))
             db.session.add(user)
             db.session.commit()
 
+        session['loggedin'] = True
+        session['id'] = user.id
+        session['username'] = user.username
         login_user(user)
 
-        return jsonify({"status": "success", "user_id": user.id}), 200
+        current_app.logger.debug("User {} logged in successfully".format(username))
+        return redirect(url_for('index'))
 
     @app.route('/login/vk')
     def login_vk():
