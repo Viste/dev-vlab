@@ -76,9 +76,10 @@ def setup_routes(app, oauth):
     @app.route('/blog/<int:post_id>')
     @login_required
     def view_post(post_id):
-        post = BlogPost.query.get_or_404(post_id)
-        post.content = Markup(markdown.markdown(post.content, extensions=['extra', 'codehilite', 'sane_lists']))
-        return render_template('blog/view_post.html', post=post)
+        with db.session.no_autoflush:
+            post = BlogPost.query.get_or_404(post_id)
+            post.content = Markup(markdown.markdown(post.content, extensions=['extra', 'codehilite', 'sane_lists']))
+            return render_template('blog/view_post.html', post=post)
 
     @app.route('/add_comment/<int:post_id>', methods=['POST'])
     @login_required
