@@ -77,7 +77,7 @@ def setup_routes(app, oauth):
     @login_required
     def view_post(post_id):
         post = BlogPost.query.get_or_404(post_id)
-        post.content = Markup(markdown.markdown(post.content))
+        post.content = Markup(markdown.markdown(post.content, extensions=['extra', 'codehilite', 'sane_lists']))
         return render_template('blog/view_post.html', post=post)
 
     @app.route('/add_comment/<int:post_id>', methods=['POST'])
