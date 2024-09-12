@@ -2,6 +2,7 @@ import base64
 import json
 import logging
 
+import markdown
 import requests
 from flask import render_template, redirect, url_for, request, flash, session, current_app, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
@@ -10,7 +11,7 @@ from markupsafe import Markup
 from database.models import db, Project, BlogPost, NavigationLink, User, Comment
 from tools.auth import authenticate_user, authenticate_vk_user
 from tools.config import Config
-from tools.utils import generate_code_verifier, generate_code_challenge
+from tools.utils import generate_code_verifier, generate_code_challenge, save_picture
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -49,6 +50,24 @@ def setup_routes(app, oauth):
     def profile():
         return render_template('auth/profile.html', user=current_user)
 
+    @app.route('/profile/edit', methods=['GET', 'POST'])
+    @login_required
+    def edit_profile():
+        if request.method == 'POST':
+            current_user.first_name = request.form['first_name']
+            current_user.last_name = request.form['last_name']
+            current_user.username = request.form['username']
+            current_user.email = request.form['email']
+
+            if 'profile_picture' in request.files:
+                picture_file = save_picture(request.files['profile_picture'])
+                current_user.profile_picture = picture_file
+
+            db.session.commit()
+            return redirect(url_for('profile'))
+
+        return render_template('profile/edit_profile.html', user=current_user)
+
     @app.route('/blog')
     def blog():
         posts = BlogPost.query.all()
@@ -58,7 +77,7 @@ def setup_routes(app, oauth):
     @login_required
     def view_post(post_id):
         post = BlogPost.query.get_or_404(post_id)
-        post.content = Markup(post.content)
+        post.content = Markup(markdown.markdown(post.content))
         return render_template('blog/view_post.html', post=post)
 
     @app.route('/add_comment/<int:post_id>', methods=['POST'])
@@ -66,7 +85,7 @@ def setup_routes(app, oauth):
     def add_comment(post_id):
         content = request.form['comment']
         post = BlogPost.query.get_or_404(post_id)
-        comment = Comment(content=content, post=post)
+        comment = Comment(content=content, post=post, user=current_user)
         db.session.add(comment)
         db.session.commit()
         return redirect(url_for('view_post', post_id=post_id))
@@ -177,6 +196,7 @@ def setup_routes(app, oauth):
         user = User.query.filter_by(telegram_id=telegram_id).first()
 
         if not user:
+            # noinspection PyArgumentList
             user = User(username=username, telegram_id=telegram_id, first_name=first_name, last_name=user_info.get('last_name'), phone_number=user_info.get('phone'))
             db.session.add(user)
             db.session.commit()
@@ -270,6 +290,7 @@ def setup_routes(app, oauth):
         user = User.query.filter_by(vk_id=vk_id).first()
 
         if not user:
+            # noinspection PyArgumentList
             user = User(
                 username=email.split('@')[0],
                 vk_id=vk_id,
@@ -282,16 +303,6 @@ def setup_routes(app, oauth):
             )
             db.session.add(user)
             current_app.logger.debug(f"Created new VK user with ID: {vk_id}")
-
-        else:
-            user.device_id = device_id
-            user.access_token = access_token
-            user.refresh_token = refresh_token
-            user.first_name = first_name
-            user.last_name = last_name
-            user.email = email
-
-            db.session.add(user)
 
         db.session.commit()
 

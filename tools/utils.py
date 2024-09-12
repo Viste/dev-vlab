@@ -1,13 +1,30 @@
 import base64
 import hashlib
 import os
+import secrets
 from functools import wraps
 
 import jwt
 import markdown
-from flask import request, jsonify
+from PIL import Image
+from flask import request, jsonify, current_app
 
 from tools.config import Config
+
+
+def save_picture(form_picture):
+    random_hex = secrets.token_hex(8)
+    _, f_ext = os.path.splitext(form_picture.filename)
+    picture_fn = random_hex + f_ext
+    picture_path = os.path.join(current_app.root_path, 'static/profile_pics', picture_fn)
+
+    # Изменение размера изображения
+    output_size = (125, 125)
+    img = Image.open(form_picture)
+    img.thumbnail(output_size)
+    img.save(picture_path)
+
+    return picture_fn
 
 
 def markdown_format(text):
