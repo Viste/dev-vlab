@@ -103,3 +103,25 @@ class User(db.Model, UserMixin):
 
     def get_id(self):
         return str(self.id)
+
+
+class MusicRelease(db.Model):
+    __table_args__ = {'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'}
+
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    release_url = db.Column(db.String(200), nullable=False)
+
+    def __repr__(self):
+        return f"<MusicRelease {self.title}>"
+
+
+class MusicDemo(db.Model):
+    __table_args__ = {'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'}
+
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    file_url = db.Column(db.String(200), nullable=False)
+
+    def __repr__(self):
+        return f"<MusicDemo {self.title}>"

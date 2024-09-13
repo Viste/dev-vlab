@@ -6,5 +6,6 @@
     <p>First Name: {{ user.first_name }}</p>
     <p>Last Name: {{ user.last_name }}</p>
     <p>Email: {{ user.email }}</p>
+    <a href="{{ url_for('edit_profile') }}" class="nav-link {% if request.path == '/blog' %}active{% endif %}">Редактировать Профиль</a>
 </div>
 {% endblock %}

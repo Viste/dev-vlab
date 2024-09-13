@@ -8,7 +8,7 @@ from flask import render_template, redirect, url_for, request, flash, session, c
 from flask_login import login_user, logout_user, login_required, current_user
 from markupsafe import Markup
 
-from database.models import db, Project, BlogPost, NavigationLink, User, Comment
+from database.models import db, Project, BlogPost, NavigationLink, User, Comment, MusicRelease, MusicDemo
 from tools.auth import authenticate_user, authenticate_vk_user
 from tools.config import Config
 from tools.utils import generate_code_verifier, generate_code_challenge, save_picture
@@ -48,7 +48,7 @@ def setup_routes(app, oauth):
     @app.route('/profile')
     @login_required
     def profile():
-        return render_template('auth/profile.html', user=current_user)
+        return render_template('profile/profile.html', user=current_user)
 
     @app.route('/profile/edit', methods=['GET', 'POST'])
     @login_required
@@ -67,6 +67,12 @@ def setup_routes(app, oauth):
             return redirect(url_for('profile'))
 
         return render_template('profile/edit_profile.html', user=current_user)
+
+    @app.route('/music')
+    def music():
+        releases = MusicRelease.query.all()
+        demos = MusicDemo.query.all()
+        return render_template('music.html', releases=releases, demos=demos)
 
     @app.route('/blog')
     def blog():

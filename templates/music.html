@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}My Music{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>My Music</h1>
+    <hr>
+
+    <h2>Релизы</h2>
+    <div class="row">
+        {% for release in releases %}
+        <div class="col-md-4">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">{{ release.title }}</h5>
+                    <a href="{{ release.release_url }}" target="_blank" class="btn btn-primary">Слушать яблоко</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <h2>Демки</h2>
+    <div class="row">
+        {% for demo in demos %}
+        <div class="col-md-4">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">{{ demo.title }}</h5>
+                    <audio controls>
+                        <source src="{{ demo.file_url }}" type="audio/mpeg">
+                        Твой браузер не хочет воспроизводить музыку, дай ему оплеуху, это недопустимо.
+                    </audio>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

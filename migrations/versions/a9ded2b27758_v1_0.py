@@ -21,10 +21,12 @@ def upgrade():
         batch_op.add_column(sa.Column('user_id', sa.Integer(), nullable=True))
         batch_op.create_foreign_key('fk_comment_user', 'user', ['user_id'], ['id'])
 
+    # Ensure all existing rows have a valid user_id before making the column non-nullable
     op.execute('UPDATE comment SET user_id = 1 WHERE user_id IS NULL;')
 
     with op.batch_alter_table('comment', schema=None) as batch_op:
-        batch_op.alter_column('user_id', nullable=False)
+        # Provide the existing type when altering the column
+        batch_op.alter_column('user_id', existing_type=sa.Integer(), nullable=False)
 
     # ### end Alembic commands ###
 
