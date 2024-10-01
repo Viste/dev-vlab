@@ -4,7 +4,7 @@ import redis
 
 
 class Config:
-    SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI', 'mariadb+pymysql://user:pass@localhost/base?charset=utf8mb4')
+    SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI', 'postgresql+psycopg2://user:pass@localhost/base?charset=utf8mb4')
     SECRET_KEY = os.getenv('SECRET_KEY', 'super_vlab_secret')
     SQLALCHEMY_ECHO = True
     SQLALCHEMY_POOL_SIZE = 10

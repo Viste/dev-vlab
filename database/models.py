@@ -15,16 +15,12 @@ logging.getLogger('sqlalchemy.dialects').setLevel(logging.DEBUG)
 
 
 class BlogPost(db.Model):
-    __table_args__ = {'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'}
-
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     content = db.Column(db.Text, nullable=False)
 
 
 class Project(db.Model):
-    __table_args__ = {'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'}
-
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     image_url = db.Column(db.String(200), nullable=False)
@@ -32,16 +28,12 @@ class Project(db.Model):
 
 
 class NavigationLink(db.Model):
-    __table_args__ = {'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'}
-
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     url = db.Column(db.String(200), nullable=False)
 
 
 class Comment(db.Model):
-    __table_args__ = {'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'}
-
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.Text, nullable=False)
     post_id = db.Column(db.Integer, db.ForeignKey('blog_post.id'), nullable=False)
@@ -51,8 +43,6 @@ class Comment(db.Model):
 
 
 class User(db.Model, UserMixin):
-    __table_args__ = {'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'}
-
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), unique=True, nullable=False)
     password_hash = db.Column(db.String(150), nullable=True)
@@ -106,8 +96,6 @@ class User(db.Model, UserMixin):
 
 
 class MusicRelease(db.Model):
-    __table_args__ = {'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'}
-
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     release_url = db.Column(db.String(200), nullable=False)
@@ -117,8 +105,6 @@ class MusicRelease(db.Model):
 
 
 class MusicDemo(db.Model):
-    __table_args__ = {'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'}
-
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     file_url = db.Column(db.String(200), nullable=False)
