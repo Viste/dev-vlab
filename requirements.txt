@@ -10,7 +10,7 @@ werkzeug
 wtforms
 MarkupSafe
 SQLAlchemy
-PyMySQL
+psycopg2
 itsdangerous
 Jinja2
 zipp
@@ -28,7 +28,6 @@ pytest
 pytest-mock
 requests
 redis
-telethon
 aiohttp
 PyJWT
 pillow
