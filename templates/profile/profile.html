@@ -2,7 +2,7 @@
 {% block content %}
 <div class="container">
     <h1>{{ user.username }}'s Profile</h1>
-    <img src="{{ url_for('static', filename='storage/' ~ user.profile_picture) }}" alt="Profile Picture" class="profile-icon">
+    <img src="{{ url_for('static', filename=user.profile_picture) }}" alt="Profile Picture" class="profile-icon">
     <p>First Name: {{ user.first_name }}</p>
     <p>Last Name: {{ user.last_name }}</p>
     <p>Email: {{ user.email }}</p>
