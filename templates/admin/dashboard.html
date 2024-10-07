@@ -1,0 +1,46 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Welcome to the Admin Dashboard</h1>
+<p>Here you can manage all the resources of your website:</p>
+<div class="row">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Blog Posts</h5>
+                <p class="card-text">Manage your blog posts.</p>
+                <a href="{{ url_for('blogpostview.index') }}" class="btn btn-primary">Manage Posts</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Projects</h5>
+                <p class="card-text">Manage your projects.</p>
+                <a href="{{ url_for('projectview.index') }}" class="btn btn-primary">Manage Projects</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Navigation Links</h5>
+                <p class="card-text">Manage your navigation links.</p>
+                <a href="{{ url_for('navigationlinkview.index') }}" class="btn btn-primary">Manage Links</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Music Releases</h5>
+                <p class="card-text">Manage your music releases.</p>
+                <a href="{{ url_for('musicreleaseview.index') }}" class="btn btn-primary">Manage Releases</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

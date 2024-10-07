@@ -35,7 +35,7 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 oauth = OAuth()
 setup_routes(app, oauth)
-setup_admin(app, db)
+setup_admin(app)
 
 # Content Security Policy (CSP) Header
 csp = {

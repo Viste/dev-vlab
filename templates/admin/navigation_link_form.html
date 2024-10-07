@@ -1,0 +1,19 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Create Navigation Link{% endblock %}
+
+{% block content %}
+<h1>Create Navigation Link</h1>
+<form method="POST" action="">
+    {{ form.hidden_tag() }}
+    <div class="mb-3">
+        {{ form.title.label(class="form-label") }}
+        {{ form.title(class="form-control") }}
+    </div>
+    <div class="mb-3">
+        {{ form.url.label(class="form-label") }}
+        {{ form.url(class="form-control") }}
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+{% endblock %}

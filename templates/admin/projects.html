@@ -1,0 +1,29 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Manage Projects{% endblock %}
+
+{% block content %}
+<h1>Manage Projects</h1>
+<a href="{{ url_for('projectview.create') }}" class="btn btn-success mb-3">Create New Project</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Image URL</th>
+            <th>URL</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for project in projects %}
+        <tr>
+            <td>{{ project.id }}</td>
+            <td>{{ project.name }}</td>
+            <td>{{ project.image_url }}</td>
+            <td><a href="{{ project.url }}" target="_blank">{{ project.url }}</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

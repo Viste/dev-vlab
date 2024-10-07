@@ -37,3 +37,34 @@ class ChangePasswordForm(FlaskForm):
 class ChangeEmailForm(FlaskForm):
     new_email = StringField('Новый Email', validators=[DataRequired(), Email()])
     submit = SubmitField('Сменить Email')
+
+
+class BlogPostForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired(), Length(max=100)])
+    content = TextAreaField('Content', validators=[DataRequired()])
+    submit = SubmitField('Submit')
+
+
+class ProjectForm(FlaskForm):
+    name = StringField('Name', validators=[DataRequired(), Length(max=100)])
+    image_url = StringField('Image URL', validators=[DataRequired(), Length(max=200)])
+    url = StringField('URL', validators=[DataRequired(), Length(max=200)])
+    submit = SubmitField('Submit')
+
+
+class NavigationLinkForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired(), Length(max=100)])
+    url = StringField('URL', validators=[DataRequired(), Length(max=200)])
+    submit = SubmitField('Submit')
+
+
+class MusicReleaseForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired(), Length(max=100)])
+    release_url = StringField('Release URL', validators=[DataRequired(), Length(max=200)])
+    submit = SubmitField('Submit')
+
+
+class MusicDemoForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired(), Length(max=100)])
+    file = FileField('File', validators=[DataRequired()])
+    submit = SubmitField('Upload')

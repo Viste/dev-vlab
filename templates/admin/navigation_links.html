@@ -1,0 +1,27 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Manage Navigation Links{% endblock %}
+
+{% block content %}
+<h1>Manage Navigation Links</h1>
+<a href="{{ url_for('navigationlinkview.create') }}" class="btn btn-success mb-3">Create New Link</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>URL</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for link in links %}
+        <tr>
+            <td>{{ link.id }}</td>
+            <td>{{ link.title }}</td>
+            <td><a href="{{ link.url }}" target="_blank">{{ link.url }}</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

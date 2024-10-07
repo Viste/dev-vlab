@@ -1,0 +1,27 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Manage Music Releases{% endblock %}
+
+{% block content %}
+<h1>Manage Music Releases</h1>
+<a href="{{ url_for('musicreleaseview.create') }}" class="btn btn-success mb-3">Create New Release</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Release URL</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for release in releases %}
+        <tr>
+            <td>{{ release.id }}</td>
+            <td>{{ release.title }}</td>
+            <td><a href="{{ release.release_url }}" target="_blank">{{ release.release_url }}</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

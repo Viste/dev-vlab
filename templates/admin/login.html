@@ -1,46 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Панель Администратора</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-</head>
-<body>
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card mt-5">
-                    <div class="card-header">
-                        <h3>Панель Администратора Вход</h3>
-                    </div>
-                    <div class="card-body">
-                        {% with messages = get_flashed_messages() %}
-                          {% if messages %}
-                            <div class="alert alert-warning" role="alert">
-                              {% for message in messages %}
-                                {{ message }}<br>
-                              {% endfor %}
-                            </div>
-                          {% endif %}
-                        {% endwith %}
-                        <form method="POST" action="{{ url_for('admin.login_view') }}">
-                            <div class="form-group">
-                                <label for="login">Логин</label>
-                                <input type="text" class="form-control" id="login" name="login" placeholder="Username" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="password">Пароль</label>
-                                <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Вход</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
+{% extends 'admin/base.html' %}
+
+{% block title %}Admin Login{% endblock %}
+
+{% block content %}
+<h1>Admin Login</h1>
+<form method="POST" action="">
+    {{ form.hidden_tag() }}
+    <div class="mb-3">
+        {{ form.username.label(class="form-label") }}
+        {{ form.username(class="form-control") }}
     </div>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</body>
-</html>
+    <div class="mb-3">
+        {{ form.password.label(class="form-label") }}
+        {{ form.password(class="form-control") }}
+    </div>
+    <button type="submit" class="btn btn-primary">Login</button>
+</form>
+{% endblock %}
