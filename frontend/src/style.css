@@ -5,16 +5,32 @@
   @apply text-sm text-gray-400 hover:text-white transition;
 }
 
+.nav-pill {
+  @apply text-sm text-gray-400 hover:text-white px-3 py-1.5 rounded-lg hover:bg-gray-800/50 transition;
+}
+
+.tab-link {
+  @apply text-xs font-medium text-gray-400 hover:text-white px-3 py-1.5 rounded-lg transition;
+}
+
+.tab-active {
+  @apply !bg-gray-700/60 !text-white;
+}
+
+.tab-link-sm {
+  @apply text-xs text-gray-400 hover:text-white px-2 py-1 rounded-lg hover:bg-gray-800/40 transition;
+}
+
 .btn {
-  @apply bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition disabled:opacity-50;
+  @apply bg-purple-600 hover:bg-purple-500 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition disabled:opacity-50;
 }
 
 .btn-secondary {
-  @apply bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm font-medium px-4 py-2 rounded-lg transition;
+  @apply bg-gray-800/60 hover:bg-gray-800 text-gray-300 text-sm font-medium px-4 py-2.5 rounded-xl transition;
 }
 
 .btn-sm {
-  @apply text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded transition;
+  @apply text-xs bg-gray-800/60 hover:bg-gray-800 text-gray-300 px-3 py-1.5 rounded-lg transition;
 }
 
 .btn-sm-danger {
@@ -22,7 +38,7 @@
 }
 
 .input {
-  @apply w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 focus:border-purple-500 focus:outline-none transition;
+  @apply w-full bg-gray-800/50 border border-gray-700/50 rounded-xl px-3 py-2.5 text-sm text-gray-100 focus:border-purple-500/50 focus:outline-none focus:bg-gray-800/80 transition placeholder-gray-600;
 }
 
 .label {
@@ -30,5 +46,19 @@
 }
 
 .admin-card {
-  @apply block border border-gray-800 rounded-lg p-4 hover:border-purple-500 transition;
+  @apply block border border-gray-800/50 rounded-2xl p-4 hover:border-purple-500/30 transition bg-gray-900/40;
+}
+
+.bento-card {
+  @apply bg-gray-900/60 border border-gray-800 rounded-2xl backdrop-blur-sm transition-all duration-300 ease-out;
+}
+
+.bento-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(168, 85, 247, 0.06), 0 2px 8px rgba(0, 0, 0, 0.3);
+  border-color: rgba(168, 85, 247, 0.15);
+}
+
+.tag {
+  @apply text-xs font-mono px-3 py-1 rounded-full border border-gray-700 text-gray-400;
 }

@@ -19,42 +19,42 @@ async function load() {
 onMounted(load)
 
 function nextPage() {
-  if (page.value * limit < total.value) {
-    page.value++
-    load()
-  }
+  if (page.value * limit < total.value) { page.value++; load() }
 }
 function prevPage() {
-  if (page.value > 1) {
-    page.value--
-    load()
-  }
+  if (page.value > 1) { page.value--; load() }
 }
 </script>
 
 <template>
-  <div class="max-w-3xl mx-auto px-4 py-12">
-    <h1 class="text-3xl font-bold mb-8">Blog</h1>
+  <div class="max-w-4xl mx-auto px-4 py-10">
+    <div class="bento-card p-8 mb-6">
+      <p class="text-sm text-purple-400 font-mono mb-2">blog</p>
+      <h1 class="text-3xl font-bold">Thoughts &amp; Notes</h1>
+      <p class="text-gray-400 mt-2">Writing about tech, music, and everything in between.</p>
+    </div>
 
-    <div v-if="!posts.length" class="text-gray-500">No posts yet.</div>
+    <div v-if="!posts.length" class="bento-card p-8 text-center text-gray-500">No posts yet.</div>
 
-    <div class="space-y-6">
+    <div class="space-y-3">
       <router-link
-        v-for="post in posts"
-        :key="post.id"
+        v-for="post in posts" :key="post.id"
         :to="{ name: 'blog-post', params: { slug: post.slug } }"
-        class="block border border-gray-800 rounded-lg p-6 hover:border-purple-500 transition"
-      >
-        <h2 class="text-xl font-semibold hover:text-purple-400 transition">{{ post.title }}</h2>
-        <p v-if="post.summary" class="text-gray-400 mt-2">{{ post.summary }}</p>
-        <time class="text-xs text-gray-500 mt-2 block">{{ new Date(post.created_at).toLocaleDateString() }}</time>
+        class="bento-card p-6 block group hover:border-purple-500/30 transition">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <h2 class="text-lg font-semibold group-hover:text-purple-400 transition">{{ post.title }}</h2>
+            <p v-if="post.summary" class="text-gray-400 text-sm mt-1.5 line-clamp-2">{{ post.summary }}</p>
+          </div>
+          <time class="text-xs text-gray-600 shrink-0 mt-1">{{ new Date(post.created_at).toLocaleDateString() }}</time>
+        </div>
       </router-link>
     </div>
 
-    <div v-if="total > limit" class="flex gap-4 mt-8 justify-center">
-      <button @click="prevPage" :disabled="page === 1" class="btn" :class="{ 'opacity-50': page === 1 }">Prev</button>
-      <span class="text-gray-400 self-center">{{ page }}</span>
-      <button @click="nextPage" :disabled="page * limit >= total" class="btn" :class="{ 'opacity-50': page * limit >= total }">Next</button>
+    <div v-if="total > limit" class="flex gap-4 mt-6 justify-center">
+      <button @click="prevPage" :disabled="page === 1" class="btn-secondary" :class="{ 'opacity-30': page === 1 }">Prev</button>
+      <span class="text-gray-500 self-center text-sm">{{ page }}</span>
+      <button @click="nextPage" :disabled="page * limit >= total" class="btn-secondary" :class="{ 'opacity-30': page * limit >= total }">Next</button>
     </div>
   </div>
 </template>

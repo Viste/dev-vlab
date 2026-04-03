@@ -25,49 +25,56 @@ async function save() {
 </script>
 
 <template>
-  <div class="max-w-lg mx-auto px-4 py-12">
-    <h1 class="text-3xl font-bold mb-8">Profile</h1>
-
-    <div v-if="auth.user" class="space-y-6">
-      <div class="flex items-center gap-4">
-        <img
-          v-if="auth.user.profile_picture"
-          :src="auth.user.profile_picture"
-          class="w-16 h-16 rounded-full object-cover"
-        />
-        <div class="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center text-xl font-bold" v-else>
+  <div class="max-w-2xl mx-auto px-4 py-10">
+    <div class="bento-card p-8 mb-4">
+      <p class="text-sm text-purple-400 font-mono mb-2">profile</p>
+      <div v-if="auth.user" class="flex items-center gap-4">
+        <img v-if="auth.user.profile_picture" :src="auth.user.profile_picture"
+          class="w-16 h-16 rounded-2xl object-cover" />
+        <div v-else class="w-16 h-16 rounded-2xl bg-gray-800 flex items-center justify-center text-xl font-bold text-purple-400">
           {{ auth.user.username[0].toUpperCase() }}
         </div>
         <div>
-          <div class="font-semibold">{{ auth.user.username }}</div>
-          <div class="text-sm text-gray-400">{{ auth.user.provider || 'local' }}</div>
+          <h1 class="text-2xl font-bold">{{ auth.user.username }}</h1>
+          <span class="text-xs text-gray-500 bg-gray-800/80 px-2 py-0.5 rounded-full">{{ auth.user.provider || 'local' }}</span>
         </div>
       </div>
+    </div>
 
+    <div v-if="auth.user" class="bento-card p-6">
       <template v-if="!editing">
-        <div class="grid gap-3 text-sm">
-          <div><span class="text-gray-500">Name:</span> {{ auth.user.first_name }} {{ auth.user.last_name }}</div>
-          <div><span class="text-gray-500">Email:</span> {{ auth.user.email || '—' }}</div>
-          <div><span class="text-gray-500">Joined:</span> {{ new Date(auth.user.created_at).toLocaleDateString() }}</div>
+        <div class="grid gap-4 text-sm">
+          <div class="flex justify-between py-2 border-b border-gray-800/50">
+            <span class="text-gray-500">Name</span>
+            <span>{{ auth.user.first_name }} {{ auth.user.last_name }}</span>
+          </div>
+          <div class="flex justify-between py-2 border-b border-gray-800/50">
+            <span class="text-gray-500">Email</span>
+            <span>{{ auth.user.email || '---' }}</span>
+          </div>
+          <div class="flex justify-between py-2">
+            <span class="text-gray-500">Joined</span>
+            <span>{{ new Date(auth.user.created_at).toLocaleDateString() }}</span>
+          </div>
         </div>
-        <button @click="editing = true" class="btn">Edit Profile</button>
+        <button @click="editing = true" class="btn mt-6">Edit Profile</button>
       </template>
 
       <form v-else @submit.prevent="save" class="space-y-4">
         <div>
-          <label class="text-sm text-gray-400">First Name</label>
+          <label class="label">First Name</label>
           <input v-model="form.first_name" class="input" />
         </div>
         <div>
-          <label class="text-sm text-gray-400">Last Name</label>
+          <label class="label">Last Name</label>
           <input v-model="form.last_name" class="input" />
         </div>
         <div>
-          <label class="text-sm text-gray-400">Email</label>
+          <label class="label">Email</label>
           <input v-model="form.email" type="email" class="input" />
         </div>
         <div class="flex gap-3">
-          <button type="submit" class="btn" :disabled="saving">Save</button>
+          <button type="submit" class="btn" :disabled="saving">{{ saving ? 'Saving...' : 'Save' }}</button>
           <button type="button" @click="editing = false" class="btn-secondary">Cancel</button>
         </div>
       </form>

@@ -48,6 +48,23 @@ func (s *AuthService) GenerateJWT(user *models.User) (string, error) {
 	return token.SignedString([]byte(s.cfg.JWTSecret))
 }
 
+func (s *AuthService) LoginPassword(username, password string) (*models.User, error) {
+	user, err := s.repo.GetUserByUsername(username)
+	if err != nil {
+		return nil, fmt.Errorf("user not found")
+	}
+	if user.PasswordHash == "" {
+		return nil, fmt.Errorf("password login not available")
+	}
+	if !checkPasswordHash(password, user.PasswordHash) {
+		return nil, fmt.Errorf("invalid password")
+	}
+	if user.IsBanned {
+		return nil, fmt.Errorf("account is banned")
+	}
+	return user, nil
+}
+
 // --- VK OAuth PKCE ---
 
 func (s *AuthService) VKAuthURL() (string, error) {

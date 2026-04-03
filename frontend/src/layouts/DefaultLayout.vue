@@ -18,49 +18,51 @@ onMounted(async () => {
 
 <template>
   <div class="min-h-screen flex flex-col bg-gray-950 text-gray-100">
-    <header class="border-b border-gray-800 bg-gray-950/80 backdrop-blur sticky top-0 z-50">
-      <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-        <router-link to="/" class="text-xl font-bold tracking-tight hover:text-purple-400 transition">
-          dev-vlab
-        </router-link>
+    <header class="sticky top-0 z-50 pt-4 px-4">
+      <div class="max-w-6xl mx-auto">
+        <div class="flex items-center justify-between h-12 px-4 bg-gray-900/70 backdrop-blur-xl border border-gray-800/50 rounded-2xl">
+          <router-link to="/" class="flex items-center gap-2 hover:opacity-80 transition">
+            <img src="/favicon.svg" class="w-5 h-5" alt="V" />
+            <span class="text-sm font-bold text-gray-200 hidden sm:inline">Viste Lab</span>
+          </router-link>
 
-        <nav class="hidden md:flex items-center gap-6">
-          <router-link to="/" class="nav-link">Home</router-link>
-          <router-link to="/blog" class="nav-link">Blog</router-link>
-          <router-link to="/music" class="nav-link">Music</router-link>
-          <a
-            v-for="link in navLinks"
-            :key="link.id"
-            :href="link.url"
-            target="_blank"
-            class="nav-link"
-          >{{ link.title }}</a>
+          <nav class="hidden md:flex items-center bg-gray-800/40 rounded-xl p-1 gap-0.5">
+            <router-link to="/" class="tab-link" active-class="tab-active" :class="{ 'tab-active': $route.path === '/' && $route.name === 'home' }">Home</router-link>
+            <router-link to="/blog" class="tab-link" active-class="tab-active">Blog</router-link>
+            <router-link to="/music" class="tab-link" active-class="tab-active">Music</router-link>
+          </nav>
+
+          <div class="hidden md:flex items-center gap-2">
+            <a v-for="link in navLinks" :key="link.id" :href="link.url" target="_blank"
+              class="text-xs text-gray-500 hover:text-gray-300 transition">{{ link.title }}</a>
+            <template v-if="auth.isLoggedIn">
+              <router-link to="/profile" class="tab-link-sm">{{ auth.user?.username }}</router-link>
+              <router-link v-if="auth.isAdmin" to="/admin" class="text-xs text-purple-400 hover:text-purple-300 transition">Admin</router-link>
+              <button @click="auth.logout()" class="text-xs text-gray-500 hover:text-gray-300 transition">Logout</button>
+            </template>
+            <router-link v-else to="/login" class="tab-link-sm">Login</router-link>
+          </div>
+
+          <button class="md:hidden p-1.5 rounded-lg hover:bg-gray-800/50 transition" @click="menuOpen = !menuOpen">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                :d="menuOpen ? 'M6 18L18 6M6 6l12 12' : 'M4 6h16M4 12h16M4 18h16'" />
+            </svg>
+          </button>
+        </div>
+
+        <div v-if="menuOpen" class="mt-2 bg-gray-900/90 backdrop-blur-xl border border-gray-800/50 rounded-2xl p-3 md:hidden space-y-1">
+          <router-link to="/" class="block tab-link" @click="menuOpen = false">Home</router-link>
+          <router-link to="/blog" class="block tab-link" @click="menuOpen = false">Blog</router-link>
+          <router-link to="/music" class="block tab-link" @click="menuOpen = false">Music</router-link>
+          <hr class="border-gray-800/50 my-2" />
           <template v-if="auth.isLoggedIn">
-            <router-link to="/profile" class="nav-link">Profile</router-link>
-            <router-link v-if="auth.isAdmin" to="/admin" class="nav-link text-purple-400">Admin</router-link>
-            <button @click="auth.logout()" class="nav-link">Logout</button>
+            <router-link to="/profile" class="block tab-link" @click="menuOpen = false">Profile</router-link>
+            <router-link v-if="auth.isAdmin" to="/admin" class="block tab-link text-purple-400" @click="menuOpen = false">Admin</router-link>
+            <button @click="auth.logout(); menuOpen = false" class="block tab-link w-full text-left">Logout</button>
           </template>
-          <router-link v-else to="/login" class="nav-link">Login</router-link>
-        </nav>
-
-        <button class="md:hidden p-2" @click="menuOpen = !menuOpen">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              :d="menuOpen ? 'M6 18L18 6M6 6l12 12' : 'M4 6h16M4 12h16M4 18h16'" />
-          </svg>
-        </button>
-      </div>
-
-      <div v-if="menuOpen" class="md:hidden border-t border-gray-800 px-4 py-3 space-y-2">
-        <router-link to="/" class="block nav-link" @click="menuOpen = false">Home</router-link>
-        <router-link to="/blog" class="block nav-link" @click="menuOpen = false">Blog</router-link>
-        <router-link to="/music" class="block nav-link" @click="menuOpen = false">Music</router-link>
-        <template v-if="auth.isLoggedIn">
-          <router-link to="/profile" class="block nav-link" @click="menuOpen = false">Profile</router-link>
-          <router-link v-if="auth.isAdmin" to="/admin" class="block nav-link text-purple-400" @click="menuOpen = false">Admin</router-link>
-          <button @click="auth.logout(); menuOpen = false" class="block nav-link">Logout</button>
-        </template>
-        <router-link v-else to="/login" class="block nav-link" @click="menuOpen = false">Login</router-link>
+          <router-link v-else to="/login" class="block tab-link" @click="menuOpen = false">Login</router-link>
+        </div>
       </div>
     </header>
 
@@ -68,8 +70,8 @@ onMounted(async () => {
       <router-view />
     </main>
 
-    <footer class="border-t border-gray-800 py-6 text-center text-gray-500 text-sm">
-      &copy; {{ new Date().getFullYear() }} dev-vlab
+    <footer class="py-8 text-center">
+      <p class="text-gray-700 text-xs">&copy; {{ new Date().getFullYear() }} Viste Lab</p>
     </footer>
   </div>
 </template>

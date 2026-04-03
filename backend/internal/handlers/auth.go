@@ -16,6 +16,31 @@ func NewAuthHandler(auth *services.AuthService) *AuthHandler {
 	return &AuthHandler{auth: auth}
 }
 
+func (h *AuthHandler) Login(c *gin.Context) {
+	var req struct {
+		Username string `json:"username" binding:"required"`
+		Password string `json:"password" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	user, err := h.auth.LoginPassword(req.Username, req.Password)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
+		return
+	}
+
+	token, err := h.auth.GenerateJWT(user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate token"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"token": token, "user": user})
+}
+
 func (h *AuthHandler) VKLogin(c *gin.Context) {
 	url, err := h.auth.VKAuthURL()
 	if err != nil {

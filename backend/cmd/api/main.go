@@ -92,6 +92,7 @@ func main() {
 	{
 		auth := api.Group("/auth")
 		{
+			auth.POST("/login", authHandler.Login)
 			auth.GET("/vk", authHandler.VKLogin)
 			auth.POST("/vk/callback", authHandler.VKCallback)
 			auth.POST("/telegram/callback", authHandler.TelegramCallback)
