@@ -6,6 +6,8 @@ import (
 	"gorm.io/gorm"
 )
 
+func (User) TableName() string { return "user" }
+
 type User struct {
 	ID             uint           `json:"id" gorm:"primaryKey"`
 	Username       string         `json:"username" gorm:"uniqueIndex;size:64;not null"`
