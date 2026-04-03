@@ -31,7 +31,9 @@ func main() {
 		DSN:                  cfg.DSN(),
 		PreferSimpleProtocol: true,
 	}), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info),
+		Logger:                                   logger.Default.LogMode(logger.Info),
+		PrepareStmt:                              false,
+		DisableForeignKeyConstraintWhenMigrating: true,
 	})
 	if err != nil {
 		log.Fatalf("failed to connect to database: %v", err)
@@ -52,7 +54,7 @@ func main() {
 		&models.Project{},
 		&models.NavigationLink{},
 	); err != nil {
-		log.Fatalf("failed to migrate: %v", err)
+		log.Printf("warning: auto-migrate: %v", err)
 	}
 
 	rdb := redis.NewClient(&redis.Options{
