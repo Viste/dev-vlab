@@ -21,22 +21,24 @@ onMounted(async () => {
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 
       <div class="md:col-span-2 bento-card p-8">
-        <p class="text-sm text-purple-400 font-mono mb-4">hello world</p>
+        <p class="text-sm text-red-500 font-mono mb-4">hello world</p>
         <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-4">
-          Software Engineer.<br/>
-          <span class="text-purple-400">Music Producer.</span><br/>
-          Creative Tinkerer.
+          Site Reliability Engineer.<br/>
+          <span class="text-red-500">Music Producer.</span>
         </h1>
         <p class="text-gray-400 text-lg max-w-xl mt-4">
-          Building backends, deploying to k8s, writing drum &amp; bass.
-          Bridging code and sound since forever.
+          Building and maintaining infrastructure, CI/CD pipelines, and keeping things alive in production.
+          Writing Go, Python, and C/C++ when needed. Making drum &amp; bass and hip-hop beats in spare time.
         </p>
         <div class="flex flex-wrap gap-2 mt-6">
+          <span class="tag">SRE</span>
           <span class="tag">GO</span>
+          <span class="tag">PYTHON</span>
+          <span class="tag">C/C++</span>
           <span class="tag">KUBERNETES</span>
-          <span class="tag">VUE</span>
-          <span class="tag">D&amp;B PRODUCTION</span>
           <span class="tag">DEVOPS</span>
+          <span class="tag">D&amp;B</span>
+          <span class="tag">HIP-HOP</span>
         </div>
       </div>
 
@@ -48,22 +50,21 @@ onMounted(async () => {
         </div>
         <div class="mt-6 space-y-2">
           <a v-for="link in links" :key="link.id" :href="link.url" target="_blank"
-            class="flex items-center gap-2 text-sm text-gray-300 hover:text-purple-400 transition">
+            class="flex items-center gap-2 text-sm text-gray-300 hover:text-red-400 transition">
             <span v-if="link.icon">{{ link.icon }}</span>
             <span>{{ link.title }}</span>
           </a>
           <a href="https://t.me/viste" target="_blank"
-            class="flex items-center gap-2 text-sm text-gray-300 hover:text-purple-400 transition">
+            class="flex items-center gap-2 text-sm text-gray-300 hover:text-red-400 transition">
             Telegram &rarr;
           </a>
         </div>
       </div>
 
-      <div class="bento-card p-6 cursor-pointer hover:border-purple-500/50 transition"
-        @click="$router.push('/music')">
+      <div class="bento-card p-6 cursor-pointer group" @click="$router.push('/music')">
         <div class="flex items-center justify-between mb-4">
           <div class="text-2xl">&#9835;</div>
-          <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-5 h-5 text-gray-700 group-hover:text-red-500 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
           </svg>
         </div>
@@ -71,11 +72,10 @@ onMounted(async () => {
         <p class="text-gray-400 text-sm">Releases, demos, radio streams.</p>
       </div>
 
-      <div class="bento-card p-6 cursor-pointer hover:border-purple-500/50 transition"
-        @click="$router.push('/blog')">
+      <div class="bento-card p-6 cursor-pointer group" @click="$router.push('/blog')">
         <div class="flex items-center justify-between mb-4">
           <div class="text-2xl">&#9998;</div>
-          <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-5 h-5 text-gray-700 group-hover:text-red-500 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
           </svg>
         </div>
@@ -84,10 +84,10 @@ onMounted(async () => {
       </div>
 
       <div class="bento-card p-6 flex flex-col justify-center items-center text-center">
-        <div class="text-5xl font-bold text-purple-400 mb-1">&#60;/&#62;</div>
-        <p class="text-gray-400 text-sm mt-2">Open source at heart</p>
+        <div class="text-4xl font-bold text-red-500 mb-1 font-mono">&lt;/&gt;</div>
+        <p class="text-gray-400 text-sm mt-2">Open source</p>
         <a href="https://github.com/Viste" target="_blank"
-          class="mt-3 text-sm text-purple-400 hover:underline">GitHub &rarr;</a>
+          class="mt-3 text-sm text-red-400 hover:underline">GitHub &rarr;</a>
       </div>
 
       <div v-if="projects.length" class="md:col-span-3 bento-card p-6">
@@ -95,11 +95,11 @@ onMounted(async () => {
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <a v-for="project in projects" :key="project.id"
             :href="project.project_url" target="_blank"
-            class="group flex gap-4 p-4 rounded-xl bg-gray-800/50 hover:bg-gray-800 transition border border-transparent hover:border-gray-700">
+            class="group flex gap-4 p-4 rounded-xl bg-gray-800/30 hover:bg-gray-800/60 transition border border-transparent hover:border-gray-700/50">
             <img v-if="project.image_url" :src="project.image_url" :alt="project.title"
               class="w-12 h-12 rounded-lg object-cover shrink-0" />
             <div>
-              <h3 class="font-semibold group-hover:text-purple-400 transition">{{ project.title }}</h3>
+              <h3 class="font-semibold group-hover:text-red-400 transition">{{ project.title }}</h3>
               <p v-if="project.description" class="text-sm text-gray-500 mt-0.5">{{ project.description }}</p>
             </div>
           </a>

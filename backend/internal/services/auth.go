@@ -56,7 +56,7 @@ func (s *AuthService) LoginPassword(username, password string) (*models.User, er
 	if user.PasswordHash == "" {
 		return nil, fmt.Errorf("password login not available")
 	}
-	if !checkPasswordHash(password, user.PasswordHash) {
+	if !CheckPasswordHash(password, user.PasswordHash) {
 		return nil, fmt.Errorf("invalid password")
 	}
 	if user.IsBanned {

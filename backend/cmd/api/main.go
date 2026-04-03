@@ -68,7 +68,7 @@ func main() {
 	blogHandler := handlers.NewBlogHandler(repo)
 	musicHandler := handlers.NewMusicHandler(repo)
 	projectHandler := handlers.NewProjectHandler(repo)
-	userHandler := handlers.NewUserHandler(repo)
+	userHandler := handlers.NewUserHandler(repo, authService)
 	navLinkHandler := handlers.NewNavLinkHandler(repo)
 
 	if cfg.Env == "production" {
@@ -124,6 +124,7 @@ func main() {
 		{
 			user.GET("/profile", userHandler.GetProfile)
 			user.PUT("/profile", userHandler.UpdateProfile)
+			user.PUT("/password", userHandler.ChangePassword)
 		}
 
 		admin := api.Group("/admin")
@@ -161,6 +162,7 @@ func main() {
 
 	if cfg.StaticDir != "" {
 		r.Static("/assets", cfg.StaticDir+"/assets")
+		r.StaticFile("/favicon.svg", cfg.StaticDir+"/favicon.svg")
 		r.StaticFile("/favicon.ico", cfg.StaticDir+"/favicon.ico")
 		r.NoRoute(func(c *gin.Context) {
 			c.File(cfg.StaticDir + "/index.html")

@@ -1,6 +1,5 @@
 @import "tailwindcss";
 
-/* Custom component classes */
 .nav-link {
   @apply text-sm text-gray-400 hover:text-white transition;
 }
@@ -22,7 +21,7 @@
 }
 
 .btn {
-  @apply bg-purple-600 hover:bg-purple-500 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition disabled:opacity-50;
+  @apply bg-red-700 hover:bg-red-600 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition disabled:opacity-50;
 }
 
 .btn-secondary {
@@ -34,11 +33,11 @@
 }
 
 .btn-sm-danger {
-  @apply text-xs bg-red-900/30 hover:bg-red-900/50 text-red-400 px-3 py-1.5 rounded transition;
+  @apply text-xs bg-red-900/30 hover:bg-red-900/50 text-red-400 px-3 py-1.5 rounded-lg transition;
 }
 
 .input {
-  @apply w-full bg-gray-800/50 border border-gray-700/50 rounded-xl px-3 py-2.5 text-sm text-gray-100 focus:border-purple-500/50 focus:outline-none focus:bg-gray-800/80 transition placeholder-gray-600;
+  @apply w-full bg-gray-800/50 border border-gray-700/50 rounded-xl px-3 py-2.5 text-sm text-gray-100 focus:border-red-500/50 focus:outline-none focus:bg-gray-800/80 transition placeholder-gray-600;
 }
 
 .label {
@@ -46,17 +45,18 @@
 }
 
 .admin-card {
-  @apply block border border-gray-800/50 rounded-2xl p-4 hover:border-purple-500/30 transition bg-gray-900/40;
+  @apply block border border-gray-800/50 rounded-2xl p-4 hover:border-red-500/20 transition bg-gray-900/40;
 }
 
 .bento-card {
-  @apply bg-gray-900/60 border border-gray-800 rounded-2xl backdrop-blur-sm transition-all duration-300 ease-out;
+  @apply bg-gray-900/60 border border-gray-800 rounded-2xl backdrop-blur-sm;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .bento-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(168, 85, 247, 0.06), 0 2px 8px rgba(0, 0, 0, 0.3);
-  border-color: rgba(168, 85, 247, 0.15);
+  transform: translateY(-4px) scale(1.005);
+  box-shadow: 0 12px 40px rgba(220, 38, 38, 0.07), 0 4px 12px rgba(0, 0, 0, 0.4);
+  border-color: rgba(220, 38, 38, 0.2);
 }
 
 .tag {

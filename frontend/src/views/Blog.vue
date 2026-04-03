@@ -29,7 +29,7 @@ function prevPage() {
 <template>
   <div class="max-w-4xl mx-auto px-4 py-10">
     <div class="bento-card p-8 mb-6">
-      <p class="text-sm text-purple-400 font-mono mb-2">blog</p>
+      <p class="text-sm text-red-500 font-mono mb-2">blog</p>
       <h1 class="text-3xl font-bold">Thoughts &amp; Notes</h1>
       <p class="text-gray-400 mt-2">Writing about tech, music, and everything in between.</p>
     </div>
@@ -40,10 +40,10 @@ function prevPage() {
       <router-link
         v-for="post in posts" :key="post.id"
         :to="{ name: 'blog-post', params: { slug: post.slug } }"
-        class="bento-card p-6 block group hover:border-purple-500/30 transition">
+        class="bento-card p-6 block group hover:border-red-500/30 transition">
         <div class="flex items-start justify-between gap-4">
           <div>
-            <h2 class="text-lg font-semibold group-hover:text-purple-400 transition">{{ post.title }}</h2>
+            <h2 class="text-lg font-semibold group-hover:text-red-500 transition">{{ post.title }}</h2>
             <p v-if="post.summary" class="text-gray-400 text-sm mt-1.5 line-clamp-2">{{ post.summary }}</p>
           </div>
           <time class="text-xs text-gray-600 shrink-0 mt-1">{{ new Date(post.created_at).toLocaleDateString() }}</time>

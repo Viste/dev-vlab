@@ -11,8 +11,7 @@ import (
 	"golang.org/x/crypto/pbkdf2"
 )
 
-// checkPasswordHash verifies werkzeug-style password hashes (pbkdf2:sha256:iterations$salt$hash)
-func checkPasswordHash(password, hash string) bool {
+func CheckPasswordHash(password, hash string) bool {
 	parts := strings.SplitN(hash, "$", 3)
 	if len(parts) != 3 {
 		return false
@@ -38,8 +37,7 @@ func checkPasswordHash(password, hash string) bool {
 	return hmac.Equal([]byte(computed), []byte(expected))
 }
 
-// hashPassword creates a werkzeug-compatible hash for new passwords
-func hashPassword(password string) string {
+func HashPassword(password string) string {
 	salt := generateRandomString(16)
 	iterations := 600000
 	dk := pbkdf2.Key([]byte(password), []byte(salt), iterations, 32, sha256.New)
