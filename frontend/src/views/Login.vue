@@ -38,7 +38,7 @@ onMounted(() => {
   if (container) {
     const script = document.createElement('script')
     script.src = 'https://telegram.org/js/telegram-widget.js?22'
-    script.setAttribute('data-telegram-login', import.meta.env.VITE_TELEGRAM_BOT_NAME || 'vlab_bot')
+    script.setAttribute('data-telegram-login', 'stalinfollower_bot')
     script.setAttribute('data-size', 'large')
     script.setAttribute('data-radius', '12')
     script.setAttribute('data-auth-url', `${window.location.origin}/auth/telegram/callback`)
