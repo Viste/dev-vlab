@@ -27,12 +27,12 @@ onMounted(load)
 <template>
   <div>
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold">Blog Posts</h1>
+      <h1 class="text-xl font-bold">Blog Posts</h1>
       <router-link to="/admin/blog/new" class="btn">New Post</router-link>
     </div>
 
     <div class="space-y-2">
-      <div v-for="post in posts" :key="post.id" class="flex items-center justify-between border border-gray-800 rounded p-3">
+      <div v-for="post in posts" :key="post.id" class="flex items-center justify-between bg-[#12121f] border border-gray-800/40 rounded-2xl p-4">
         <div>
           <span class="font-medium">{{ post.title }}</span>
           <span v-if="!post.published" class="ml-2 text-xs text-yellow-500 bg-yellow-500/10 px-2 py-0.5 rounded">Draft</span>

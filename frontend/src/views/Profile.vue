@@ -32,6 +32,17 @@ async function changePassword() {
   }
 }
 
+async function uploadAvatar(e: Event) {
+  const file = (e.target as HTMLInputElement).files?.[0]
+  if (!file) return
+  const fd = new FormData()
+  fd.append('avatar', file)
+  try {
+    await api.post('/user/avatar', fd)
+    await auth.fetchUser()
+  } catch { /* ignore */ }
+}
+
 async function save() {
   saving.value = true
   try {
@@ -49,10 +60,16 @@ async function save() {
     <div class="bento-card p-8 mb-4">
       <p class="text-sm text-red-700 font-mono mb-2">profile</p>
       <div v-if="auth.user" class="flex items-center gap-4">
-        <img v-if="auth.user.profile_picture" :src="auth.user.profile_picture"
-          class="w-16 h-16 rounded-2xl object-cover" />
-        <div v-else class="w-16 h-16 rounded-2xl bg-gray-800 flex items-center justify-center text-xl font-bold text-red-700">
-          {{ auth.user.username[0].toUpperCase() }}
+        <div class="relative group cursor-pointer" @click="($refs.avatarInput as HTMLInputElement).click()">
+          <img v-if="auth.user.profile_picture" :src="auth.user.profile_picture"
+            class="w-16 h-16 rounded-2xl object-cover" />
+          <div v-else class="w-16 h-16 rounded-2xl bg-gray-800 flex items-center justify-center text-xl font-bold text-red-700">
+            {{ auth.user.username[0].toUpperCase() }}
+          </div>
+          <div class="absolute inset-0 rounded-2xl bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+            <span class="text-xs text-white">Change</span>
+          </div>
+          <input ref="avatarInput" type="file" accept="image/*" class="hidden" @change="uploadAvatar" />
         </div>
         <div>
           <h1 class="text-2xl font-bold">{{ auth.user.username }}</h1>

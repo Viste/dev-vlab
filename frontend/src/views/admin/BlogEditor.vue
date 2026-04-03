@@ -49,7 +49,7 @@ async function save() {
 
 <template>
   <div>
-    <h1 class="text-2xl font-bold mb-6">{{ isEdit ? 'Edit Post' : 'New Post' }}</h1>
+    <h1 class="text-xl font-bold mb-6">{{ isEdit ? 'Edit Post' : 'New Post' }}</h1>
 
     <form @submit.prevent="save" class="space-y-4 max-w-3xl">
       <div>

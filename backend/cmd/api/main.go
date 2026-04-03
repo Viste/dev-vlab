@@ -137,6 +137,7 @@ func main() {
 			user.GET("/profile", userHandler.GetProfile)
 			user.PUT("/profile", userHandler.UpdateProfile)
 			user.PUT("/password", userHandler.ChangePassword)
+			user.POST("/avatar", userHandler.UploadAvatar)
 		}
 
 		admin := api.Group("/admin")

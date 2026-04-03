@@ -38,10 +38,10 @@ onMounted(load)
 
 <template>
   <div>
-    <h1 class="text-2xl font-bold mb-6">Radio Stream</h1>
+    <h1 class="text-xl font-bold mb-6">Radio Stream</h1>
 
     <div v-if="!editing">
-      <div v-if="radio" class="border border-gray-800 rounded-lg p-4 space-y-2">
+      <div v-if="radio" class="bg-[#12121f] border border-gray-800/40 rounded-2xl p-5 space-y-2">
         <p><span class="text-gray-500">Title:</span> {{ radio.title }}</p>
         <p><span class="text-gray-500">URL:</span> {{ radio.stream_url }}</p>
         <p><span class="text-gray-500">Active:</span> {{ radio.is_active ? 'Yes' : 'No' }}</p>

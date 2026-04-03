@@ -47,11 +47,11 @@ onMounted(load)
 <template>
   <div>
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold">Navigation Links</h1>
+      <h1 class="text-xl font-bold">Navigation Links</h1>
       <button @click="openNew" class="btn">Add Link</button>
     </div>
 
-    <div v-if="showForm" class="border border-gray-800 rounded-lg p-4 mb-6 space-y-3">
+    <div v-if="showForm" class="bg-[#12121f] border border-gray-800/40 rounded-2xl p-5 mb-6 space-y-3">
       <input v-model="form.title" placeholder="Title" class="input" />
       <input v-model="form.url" placeholder="URL" class="input" />
       <input v-model="form.icon" placeholder="Icon (optional)" class="input" />
@@ -67,7 +67,7 @@ onMounted(load)
     </div>
 
     <div class="space-y-2">
-      <div v-for="item in items" :key="item.id" class="flex items-center justify-between border border-gray-800 rounded p-3">
+      <div v-for="item in items" :key="item.id" class="flex items-center justify-between bg-[#12121f] border border-gray-800/40 rounded-2xl p-4">
         <div>
           <span>{{ item.title }}</span>
           <span class="text-gray-500 text-sm ml-2">{{ item.url }}</span>
