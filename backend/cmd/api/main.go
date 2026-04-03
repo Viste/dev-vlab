@@ -44,6 +44,12 @@ func main() {
 	sqlDB.SetMaxIdleConns(5)
 	sqlDB.SetConnMaxLifetime(time.Hour)
 
+	db.Exec(`ALTER TABLE "user" DROP CONSTRAINT IF EXISTS uni_user_username`)
+	db.Exec(`ALTER TABLE "user" DROP CONSTRAINT IF EXISTS uni_user_email`)
+	db.Exec(`DROP INDEX IF EXISTS idx_user_deleted_at`)
+	db.Exec(`DROP INDEX IF EXISTS idx_user_telegram_id`)
+	db.Exec(`DROP INDEX IF EXISTS idx_user_vk_id`)
+
 	if err := db.AutoMigrate(
 		&models.User{},
 		&models.BlogPost{},
