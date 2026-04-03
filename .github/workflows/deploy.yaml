@@ -32,8 +32,13 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Deploy to k8s
-        run: |
-          echo "${{ secrets.KUBECONFIG }}" > /tmp/kubeconfig
-          kubectl --kubeconfig /tmp/kubeconfig rollout restart deployment/viste-site -n vlab
-          rm /tmp/kubeconfig
+      - name: Kubernetes context
+        uses: Azure/k8s-set-context@v3
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBECONFIG }}
+          context: kubernetes-admin@kubernetes
+
+      - name: Rollout pod in k8s
+        shell: bash
+        run: kubectl rollout restart -n vlab deployment viste-site
