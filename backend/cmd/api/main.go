@@ -27,7 +27,10 @@ import (
 func main() {
 	cfg := config.Load()
 
-	db, err := gorm.Open(postgres.Open(cfg.DSN()), &gorm.Config{
+	db, err := gorm.Open(postgres.New(postgres.Config{
+		DSN:                  cfg.DSN(),
+		PreferSimpleProtocol: true,
+	}), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
 	})
 	if err != nil {
