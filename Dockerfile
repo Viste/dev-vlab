@@ -1,22 +1,32 @@
-FROM python:3.9-slim
+FROM node:22-alpine AS frontend
 
-LABEL authors="viste"
+WORKDIR /build
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci
+COPY frontend/ .
+RUN npm run build
 
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+FROM golang:1.26-alpine AS builder
+
+RUN apk add --no-cache git gcc musl-dev
+
+WORKDIR /build
+COPY backend/go.mod backend/go.sum ./
+RUN go mod download
+COPY backend/ .
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o api ./cmd/api
+
+FROM alpine:3.21
+
+RUN apk add --no-cache ca-certificates tzdata
+RUN adduser -D -g '' appuser
+USER appuser
 
 WORKDIR /app
-RUN apt-get update \
-    && apt-get -y install libpq-dev gcc
+COPY --from=builder /build/api .
+COPY --from=frontend /build/dist ./static
 
-COPY requirements.txt requirements.txt
-RUN pip install -r requirements.txt
+ENV STATIC_DIR=/app/static
+EXPOSE 8000
 
-COPY . /app
-COPY start.sh /app/start.sh
-
-RUN chmod +x /app/start.sh
-
-EXPOSE 5000
-
-CMD ["/app/start.sh"]
+CMD ["./api"]
