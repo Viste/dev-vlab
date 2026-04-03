@@ -10,7 +10,7 @@ func (User) TableName() string { return "user" }
 
 type User struct {
 	ID             uint           `json:"id" gorm:"primaryKey"`
-	Username       string         `json:"username" gorm:"uniqueIndex;size:64;not null"`
+	Username       string         `json:"username" gorm:"size:64;not null"`
 	Email          string         `json:"email,omitempty" gorm:"size:255"`
 	PasswordHash   string         `json:"-" gorm:"size:255"`
 	FirstName      string         `json:"first_name,omitempty" gorm:"size:64"`
@@ -31,7 +31,7 @@ type User struct {
 type BlogPost struct {
 	ID        uint           `json:"id" gorm:"primaryKey"`
 	Title     string         `json:"title" gorm:"size:255;not null"`
-	Slug      string         `json:"slug" gorm:"uniqueIndex;size:255;not null"`
+	Slug      string         `json:"slug" gorm:"size:255;not null"`
 	Content   string         `json:"content" gorm:"type:text;not null"`
 	Summary   string         `json:"summary,omitempty" gorm:"size:512"`
 	CoverURL  string         `json:"cover_url,omitempty" gorm:"size:255"`
