@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"log"
 	"math/rand"
 	"net/http"
 	"net/url"
@@ -188,6 +189,7 @@ type TelegramAuthData struct {
 
 func (s *AuthService) TelegramCallback(data TelegramAuthData) (*models.User, error) {
 	if !s.verifyTelegramAuth(data) {
+		log.Printf("telegram auth failed: id=%d username=%s", data.ID, data.Username)
 		return nil, fmt.Errorf("invalid telegram auth data")
 	}
 
