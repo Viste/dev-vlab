@@ -10,7 +10,7 @@ func (User) TableName() string { return "user" }
 
 type User struct {
 	ID             uint           `json:"id" gorm:"primaryKey"`
-	Username       string         `json:"username" gorm:"size:64;not null"`
+	Username       string         `json:"username" gorm:"uniqueIndex;size:64;not null"`
 	Email          string         `json:"email,omitempty" gorm:"size:255"`
 	PasswordHash   string         `json:"-" gorm:"size:255"`
 	FirstName      string         `json:"first_name,omitempty" gorm:"size:64"`
