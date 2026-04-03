@@ -61,7 +61,7 @@ onMounted(() => {
       <form @submit.prevent="loginPassword" class="space-y-3 mb-6">
         <input v-model="username" placeholder="Username" class="input" required autocomplete="username" />
         <input v-model="password" type="password" placeholder="Password" class="input" required autocomplete="current-password" />
-        <p v-if="error" class="text-red-400 text-sm">{{ error }}</p>
+        <p v-if="error" class="text-red-600 text-sm">{{ error }}</p>
         <button type="submit" class="btn w-full" :disabled="loading">
           {{ loading ? 'Signing in...' : 'Sign in' }}
         </button>

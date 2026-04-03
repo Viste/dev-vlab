@@ -39,7 +39,7 @@ onMounted(load)
 
     <article v-else-if="post">
       <div class="bento-card p-8 mb-6">
-        <router-link to="/blog" class="text-sm text-red-500 hover:underline mb-4 inline-block">&larr; Back to blog</router-link>
+        <router-link to="/blog" class="text-sm text-red-700 hover:underline mb-4 inline-block">&larr; Back to blog</router-link>
         <img v-if="post.cover_url" :src="post.cover_url" :alt="post.title" class="w-full rounded-xl mb-6 max-h-72 object-cover" />
         <h1 class="text-3xl font-bold mb-2">{{ post.title }}</h1>
         <time class="text-sm text-gray-500">{{ new Date(post.created_at).toLocaleDateString() }}</time>
@@ -55,7 +55,7 @@ onMounted(load)
           <button type="submit" class="btn mt-2">Post</button>
         </form>
         <p v-else class="text-gray-500 text-sm mb-6">
-          <router-link to="/login" class="text-red-500 hover:underline">Log in</router-link> to comment.
+          <router-link to="/login" class="text-red-700 hover:underline">Log in</router-link> to comment.
         </p>
 
         <div class="space-y-3">
@@ -66,7 +66,7 @@ onMounted(load)
               <div class="flex items-center gap-3">
                 <time class="text-xs text-gray-600">{{ new Date(comment.created_at).toLocaleDateString() }}</time>
                 <button v-if="auth.user?.id === comment.user_id || auth.isAdmin"
-                  @click="deleteComment(comment.id)" class="text-xs text-red-400/60 hover:text-red-400">Delete</button>
+                  @click="deleteComment(comment.id)" class="text-xs text-red-600/60 hover:text-red-600">Delete</button>
               </div>
             </div>
             <p class="text-sm text-gray-400">{{ comment.content }}</p>

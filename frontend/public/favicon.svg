@@ -1,9 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="12" fill="#1a1a2e"/>
-  <g transform="translate(32,32)">
-    <path d="M-14,-18 C-12,-8 -4,8 0,20" stroke="#dc2626" stroke-width="5.5" fill="none" stroke-linecap="round"/>
-    <path d="M14,-18 L0,20" stroke="#dc2626" stroke-width="5.5" fill="none" stroke-linecap="round"/>
-    <rect x="8" y="-22" width="12" height="5" rx="1.5" fill="#dc2626"/>
-    <polygon points="0,-24 1.5,-20.5 5,-20.5 2.5,-18 3.5,-14.5 0,-16.5 -3.5,-14.5 -2.5,-18 -5,-20.5 -1.5,-20.5" fill="#fbbf24" opacity="0.9"/>
-  </g>
+  <rect width="64" height="64" rx="14" fill="#141420"/>
+  <!-- Big star background -->
+  <polygon points="32,6 38.5,22 56,24 43,36 46.5,54 32,45 17.5,54 21,36 8,24 25.5,22" fill="#b91c1c" opacity="0.85"/>
+  <!-- V with sickle-curve left + hammer-straight right -->
+  <path d="M20,16 C22,26 28,40 32,50" stroke="#141420" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M44,16 L32,50" stroke="#141420" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <!-- Hammer head on right arm -->
+  <rect x="39" y="12" width="10" height="4.5" rx="1.5" fill="#141420"/>
 </svg>

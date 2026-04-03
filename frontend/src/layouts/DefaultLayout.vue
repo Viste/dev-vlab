@@ -37,7 +37,7 @@ onMounted(async () => {
               class="text-xs text-gray-500 hover:text-gray-300 transition">{{ link.title }}</a>
             <template v-if="auth.isLoggedIn">
               <router-link to="/profile" class="tab-link-sm">{{ auth.user?.username }}</router-link>
-              <router-link v-if="auth.isAdmin" to="/admin" class="text-xs text-red-500 hover:text-red-400 transition">Admin</router-link>
+              <router-link v-if="auth.isAdmin" to="/admin" class="text-xs text-red-700 hover:text-red-600 transition">Admin</router-link>
               <button @click="auth.logout()" class="text-xs text-gray-500 hover:text-gray-300 transition">Logout</button>
             </template>
             <router-link v-else to="/login" class="tab-link-sm">Login</router-link>
@@ -58,7 +58,7 @@ onMounted(async () => {
           <hr class="border-gray-800/50 my-2" />
           <template v-if="auth.isLoggedIn">
             <router-link to="/profile" class="block tab-link" @click="menuOpen = false">Profile</router-link>
-            <router-link v-if="auth.isAdmin" to="/admin" class="block tab-link text-red-500" @click="menuOpen = false">Admin</router-link>
+            <router-link v-if="auth.isAdmin" to="/admin" class="block tab-link text-red-700" @click="menuOpen = false">Admin</router-link>
             <button @click="auth.logout(); menuOpen = false" class="block tab-link w-full text-left">Logout</button>
           </template>
           <router-link v-else to="/login" class="block tab-link" @click="menuOpen = false">Login</router-link>

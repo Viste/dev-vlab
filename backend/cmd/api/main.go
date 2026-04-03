@@ -167,8 +167,12 @@ func main() {
 
 	if cfg.StaticDir != "" {
 		r.Static("/assets", cfg.StaticDir+"/assets")
-		r.StaticFile("/favicon.svg", cfg.StaticDir+"/favicon.svg")
-		r.StaticFile("/favicon.ico", cfg.StaticDir+"/favicon.ico")
+		r.GET("/favicon.svg", func(c *gin.Context) {
+			c.File(cfg.StaticDir + "/favicon.svg")
+		})
+		r.GET("/favicon.ico", func(c *gin.Context) {
+			c.File(cfg.StaticDir + "/favicon.ico")
+		})
 		r.NoRoute(func(c *gin.Context) {
 			c.File(cfg.StaticDir + "/index.html")
 		})

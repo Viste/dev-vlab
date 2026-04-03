@@ -21,7 +21,7 @@
 }
 
 .btn {
-  @apply bg-red-700 hover:bg-red-600 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition disabled:opacity-50;
+  @apply bg-red-800 hover:bg-red-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition disabled:opacity-50;
 }
 
 .btn-secondary {
@@ -37,7 +37,7 @@
 }
 
 .input {
-  @apply w-full bg-gray-800/50 border border-gray-700/50 rounded-xl px-3 py-2.5 text-sm text-gray-100 focus:border-red-500/50 focus:outline-none focus:bg-gray-800/80 transition placeholder-gray-600;
+  @apply w-full bg-gray-800/50 border border-gray-700/50 rounded-xl px-3 py-2.5 text-sm text-gray-100 focus:border-red-800/60 focus:outline-none focus:bg-gray-800/80 transition placeholder-gray-600;
 }
 
 .label {
@@ -45,7 +45,7 @@
 }
 
 .admin-card {
-  @apply block border border-gray-800/50 rounded-2xl p-4 hover:border-red-500/20 transition bg-gray-900/40;
+  @apply block border border-gray-800/50 rounded-2xl p-4 hover:border-red-800/25 transition bg-gray-900/40;
 }
 
 .bento-card {
@@ -55,8 +55,8 @@
 
 .bento-card:hover {
   transform: translateY(-4px) scale(1.005);
-  box-shadow: 0 12px 40px rgba(220, 38, 38, 0.07), 0 4px 12px rgba(0, 0, 0, 0.4);
-  border-color: rgba(220, 38, 38, 0.2);
+  box-shadow: 0 12px 40px rgba(153, 27, 27, 0.08), 0 4px 12px rgba(0, 0, 0, 0.4);
+  border-color: rgba(153, 27, 27, 0.25);
 }
 
 .tag {

@@ -26,16 +26,16 @@ onMounted(async () => {
   <div class="max-w-6xl mx-auto px-4 py-10">
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
       <div class="md:col-span-2 bento-card p-8">
-        <p class="text-sm text-red-500 font-mono mb-2">music</p>
+        <p class="text-sm text-red-700 font-mono mb-2">music</p>
         <h1 class="text-3xl font-bold">Music &amp; Sound</h1>
         <p class="text-gray-400 mt-2">Releases, demos, and live radio streams.</p>
       </div>
 
-      <div v-if="radio" class="bento-card p-6 flex flex-col justify-between border-red-500/20">
+      <div v-if="radio" class="bento-card p-6 flex flex-col justify-between border-red-800/20">
         <div>
           <div class="flex items-center gap-2 mb-2">
-            <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-            <span class="text-sm font-semibold text-red-500">LIVE</span>
+            <span class="w-2 h-2 rounded-full bg-red-700 animate-pulse"></span>
+            <span class="text-sm font-semibold text-red-700">LIVE</span>
           </div>
           <h2 class="font-bold">{{ radio.title }}</h2>
         </div>
@@ -69,7 +69,7 @@ onMounted(async () => {
             <iframe :src="release.embed_url" width="100%" height="166" frameborder="0" allow="autoplay" class="rounded-lg"></iframe>
           </div>
           <a v-if="release.release_url" :href="release.release_url" target="_blank"
-            class="inline-block mt-3 text-sm text-red-500 hover:underline">Listen &rarr;</a>
+            class="inline-block mt-3 text-sm text-red-700 hover:underline">Listen &rarr;</a>
         </div>
       </div>
       <div v-if="!releases.length" class="md:col-span-3 bento-card p-8 text-center text-gray-600">No releases yet.</div>

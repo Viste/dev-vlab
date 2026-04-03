@@ -47,11 +47,11 @@ async function save() {
 <template>
   <div class="max-w-2xl mx-auto px-4 py-10">
     <div class="bento-card p-8 mb-4">
-      <p class="text-sm text-red-500 font-mono mb-2">profile</p>
+      <p class="text-sm text-red-700 font-mono mb-2">profile</p>
       <div v-if="auth.user" class="flex items-center gap-4">
         <img v-if="auth.user.profile_picture" :src="auth.user.profile_picture"
           class="w-16 h-16 rounded-2xl object-cover" />
-        <div v-else class="w-16 h-16 rounded-2xl bg-gray-800 flex items-center justify-center text-xl font-bold text-red-500">
+        <div v-else class="w-16 h-16 rounded-2xl bg-gray-800 flex items-center justify-center text-xl font-bold text-red-700">
           {{ auth.user.username[0].toUpperCase() }}
         </div>
         <div>
@@ -108,7 +108,7 @@ async function save() {
         <input v-model="newPassword" type="password" placeholder="New password" class="input flex-1" />
         <button @click="changePassword" class="btn shrink-0" :disabled="changingPassword">Update</button>
       </div>
-      <p v-if="passwordMsg" class="text-sm mt-2" :class="passwordMsg.includes('updated') ? 'text-green-400' : 'text-red-400'">{{ passwordMsg }}</p>
+      <p v-if="passwordMsg" class="text-sm mt-2" :class="passwordMsg.includes('updated') ? 'text-green-400' : 'text-red-600'">{{ passwordMsg }}</p>
     </div>
   </div>
 </template>

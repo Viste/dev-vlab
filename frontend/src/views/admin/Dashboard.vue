@@ -6,7 +6,7 @@ const auth = useAuthStore()
 <template>
   <div>
     <div class="bento-card p-8 mb-6">
-      <p class="text-sm text-red-500 font-mono mb-2">admin</p>
+      <p class="text-sm text-red-700 font-mono mb-2">admin</p>
       <h1 class="text-2xl font-bold">Dashboard</h1>
       <p class="text-gray-400 mt-1">Welcome back, {{ auth.user?.username }}.</p>
     </div>

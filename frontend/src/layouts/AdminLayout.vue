@@ -18,12 +18,12 @@ const links = [
   <div class="min-h-screen flex bg-gray-950 text-gray-100">
     <aside class="w-52 border-r border-gray-800/50 p-4 space-y-1 shrink-0 bg-gray-950/50">
       <router-link to="/" class="flex items-center gap-2 mb-6 hover:opacity-80 transition">
-        <span class="text-lg font-bold text-red-500">V</span>
+        <span class="text-lg font-bold text-red-700">V</span>
         <span class="text-xs font-semibold text-gray-400">Admin</span>
       </router-link>
       <router-link v-for="link in links" :key="link.to" :to="link.to"
         class="block px-3 py-2 rounded-xl text-sm text-gray-400 hover:text-white hover:bg-gray-800/50 transition"
-        active-class="!bg-gray-800/80 !text-red-500">
+        active-class="!bg-gray-800/80 !text-red-700">
         {{ link.label }}
       </router-link>
       <hr class="border-gray-800/50 my-4" />
