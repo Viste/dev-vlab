@@ -33,8 +33,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Deploy to k8s
-        uses: actions-hub/kubectl@master
-        env:
-          KUBE_CONFIG: ${{ secrets.KUBECONFIG }}
-        with:
-          args: rollout restart deployment/viste-site -n vlab
+        run: |
+          echo "${{ secrets.KUBECONFIG }}" > /tmp/kubeconfig
+          kubectl --kubeconfig /tmp/kubeconfig rollout restart deployment/viste-site -n vlab
+          rm /tmp/kubeconfig
