@@ -80,6 +80,7 @@ func main() {
 	repo := repository.New(db)
 	authService := services.NewAuthService(cfg, repo, rdb)
 
+	saturatorHandler := handlers.NewSaturatorHandler(rdb)
 	authHandler := handlers.NewAuthHandler(authService)
 	blogHandler := handlers.NewBlogHandler(repo)
 	musicHandler := handlers.NewMusicHandler(repo)
@@ -134,6 +135,8 @@ func main() {
 		api.GET("/projects", projectHandler.List)
 
 		api.GET("/nav-links", navLinkHandler.List)
+
+		api.GET("/saturator/version", saturatorHandler.GetVersion)
 
 		user := api.Group("/user")
 		user.Use(middleware.JWTAuth(cfg.JWTSecret))

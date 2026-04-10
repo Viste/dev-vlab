@@ -12,6 +12,7 @@ const router = createRouter({
         { path: 'blog', name: 'blog', component: () => import('../views/Blog.vue') },
         { path: 'blog/:slug', name: 'blog-post', component: () => import('../views/BlogPost.vue') },
         { path: 'music', name: 'music', component: () => import('../views/Music.vue') },
+        { path: 'saturator', name: 'saturator', component: () => import('../views/Saturator.vue') },
         { path: 'login', name: 'login', component: () => import('../views/Login.vue') },
         { path: 'profile', name: 'profile', component: () => import('../views/Profile.vue'), meta: { auth: true } },
         { path: 'auth/vk/callback', name: 'vk-callback', component: () => import('../views/VKCallback.vue') },
