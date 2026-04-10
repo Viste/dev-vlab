@@ -27,11 +27,15 @@ import (
 func main() {
 	cfg := config.Load()
 
+	gormLogLevel := logger.Warn
+	if cfg.Env != "production" {
+		gormLogLevel = logger.Info
+	}
 	db, err := gorm.Open(postgres.New(postgres.Config{
 		DSN:                  cfg.DSN(),
 		PreferSimpleProtocol: true,
 	}), &gorm.Config{
-		Logger:                                   logger.Default.LogMode(logger.Info),
+		Logger:                                   logger.Default.LogMode(gormLogLevel),
 		PrepareStmt:                              false,
 		DisableForeignKeyConstraintWhenMigrating: true,
 	})

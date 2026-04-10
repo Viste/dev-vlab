@@ -37,7 +37,7 @@ const skills = [
         <div class="relative">
           <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 text-red-400 text-xs font-mono mb-6">
             <span class="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse"></span>
-            available for work
+            hello world;
           </div>
           <h1 class="text-4xl md:text-5xl font-bold leading-[1.1] mb-5">
             Site Reliability<br/>Engineer.
