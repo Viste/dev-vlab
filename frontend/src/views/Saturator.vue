@@ -49,7 +49,7 @@ onMounted(async () => {
           </div>
           <div>
             <div class="font-semibold group-hover:text-white transition">Download for Mac</div>
-            <div class="text-xs text-gray-500">.dmg installer</div>
+            <div class="text-xs text-gray-500">macOS (Apple Silicon)</div>
           </div>
           <svg class="w-5 h-5 text-gray-700 group-hover:text-blue-400 transition ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>

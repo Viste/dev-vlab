@@ -93,10 +93,13 @@ func fetchGitHubRelease() (*SaturatorVersion, error) {
 
 	for _, asset := range release.Assets {
 		name := strings.ToLower(asset.Name)
-		switch {
-		case strings.HasSuffix(name, ".dmg") || strings.Contains(name, "mac"):
+		if strings.HasSuffix(name, ".dmg") {
 			v.URLMac = asset.BrowserDownloadURL
-		case strings.HasSuffix(name, ".exe") || strings.Contains(name, "win"):
+		} else if strings.HasSuffix(name, ".exe") {
+			v.URLWin = asset.BrowserDownloadURL
+		} else if strings.HasSuffix(name, ".zip") && strings.Contains(name, "mac") && v.URLMac == "" {
+			v.URLMac = asset.BrowserDownloadURL
+		} else if strings.HasSuffix(name, ".zip") && strings.Contains(name, "win") && v.URLWin == "" {
 			v.URLWin = asset.BrowserDownloadURL
 		}
 	}
