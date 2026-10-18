@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import api from '../../api/client'
 import { useAuthStore } from '../../stores/auth'
 import type { Apartment, ApartmentCriterion, ApartmentStatus } from '../../api/types'
 import ApartmentCard from '../../components/apartments/ApartmentCard.vue'
 import CriteriaPanel from '../../components/apartments/CriteriaPanel.vue'
-import { STATUS_OPTIONS, detectSource, sourceMeta } from '../../components/apartments/apartments'
+import { STATUS_OPTIONS, detectSource, sourceClass } from '../../components/apartments/apartments'
 
 const auth = useAuthStore()
+const { t } = useI18n()
 
 const items = ref<Apartment[]>([])
 const criteria = ref<ApartmentCriterion[]>([])
@@ -23,10 +25,10 @@ type SortKey = 'newest' | 'score' | 'price_asc' | 'price_desc'
 const filterStatus = ref<ApartmentStatus | ''>('')
 const sortKey = ref<SortKey>('newest')
 const sortOptions: { value: SortKey; label: string }[] = [
-  { value: 'newest', label: 'Newest' },
-  { value: 'score', label: 'Top rated' },
-  { value: 'price_asc', label: 'Price ↑' },
-  { value: 'price_desc', label: 'Price ↓' },
+  { value: 'newest', label: 'apartments.sortNewest' },
+  { value: 'score', label: 'apartments.sortScore' },
+  { value: 'price_asc', label: 'apartments.sortPriceAsc' },
+  { value: 'price_desc', label: 'apartments.sortPriceDesc' },
 ]
 
 const emptyForm = () => ({
@@ -36,7 +38,7 @@ const emptyForm = () => ({
 const form = ref(emptyForm())
 
 const activeCriteria = computed(() => criteria.value.filter((c) => c.is_active))
-const previewSource = computed(() => sourceMeta(detectSource(form.value.url)))
+const previewSource = computed(() => detectSource(form.value.url))
 
 const counts = computed(() => {
   const c: Record<string, number> = { '': items.value.length }
@@ -73,7 +75,7 @@ async function load() {
     items.value = a.data
     criteria.value = c.data
   } catch (e: any) {
-    error.value = e.response?.data?.error || 'Failed to load'
+    error.value = e.response?.data?.error || t('apartments.loadFailed')
   } finally {
     loading.value = false
   }
@@ -105,7 +107,7 @@ function openEdit(a: Apartment) {
 async function save() {
   error.value = ''
   if (!form.value.url.trim()) {
-    error.value = 'Link is required'
+    error.value = t('apartments.linkRequired')
     return
   }
   saving.value = true
@@ -117,14 +119,14 @@ async function save() {
     replaceItem(data)
     showForm.value = false
   } catch (e: any) {
-    error.value = e.response?.data?.error || 'Failed to save'
+    error.value = e.response?.data?.error || t('apartments.saveFailed')
   } finally {
     saving.value = false
   }
 }
 
 async function remove(id: number) {
-  if (!confirm('Delete this apartment and all its ratings?')) return
+  if (!confirm(t('apartments.confirmDelete'))) return
   await api.delete(`/admin/apartments/${id}`)
   items.value = items.value.filter((x) => x.id !== id)
 }
@@ -139,7 +141,7 @@ async function rate(id: number, payload: { scores: Record<string, number>; comme
     const { data } = await api.put<Apartment>(`/admin/apartments/${id}/rating`, payload)
     replaceItem(data)
   } catch (e: any) {
-    error.value = e.response?.data?.error || 'Failed to save rating'
+    error.value = e.response?.data?.error || t('apartments.rateFailed')
   }
 }
 
@@ -159,12 +161,12 @@ onMounted(load)
   <div>
     <div class="flex items-center justify-between mb-6 gap-4 flex-wrap">
       <div>
-        <h1 class="text-xl font-bold">Apartments</h1>
-        <p class="text-gray-500 text-sm mt-0.5">Paste links from Cian, Yandex Realty or anywhere else, then rate them together.</p>
+        <h1 class="text-xl font-bold">{{ $t('apartments.title') }}</h1>
+        <p class="text-gray-500 text-sm mt-0.5">{{ $t('apartments.subtitle') }}</p>
       </div>
       <div class="flex items-center gap-2">
-        <button @click="showCriteria = !showCriteria" class="btn-secondary" :class="showCriteria && '!bg-white/10 !text-white'">Criteria</button>
-        <button @click="openNew" class="btn">Add apartment</button>
+        <button @click="showCriteria = !showCriteria" class="btn-secondary" :class="showCriteria && '!bg-white/10 !text-white'">{{ $t('apartments.criteria') }}</button>
+        <button @click="openNew" class="btn">{{ $t('apartments.add') }}</button>
       </div>
     </div>
 
@@ -174,72 +176,72 @@ onMounted(load)
 
     <form v-if="showForm" @submit.prevent="save" class="bg-[#12121f] border border-gray-800/40 rounded-2xl p-5 mb-6 space-y-3">
       <div class="flex items-center justify-between">
-        <h2 class="font-semibold">{{ editingId ? 'Edit apartment' : 'New apartment' }}</h2>
-        <span class="text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-md" :class="previewSource.cls">{{ previewSource.label }}</span>
+        <h2 class="font-semibold">{{ editingId ? $t('apartments.edit') : $t('apartments.new') }}</h2>
+        <span class="text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-md" :class="sourceClass(previewSource)">{{ $t('apartments.sources.' + previewSource) }}</span>
       </div>
-      <input v-model="form.url" placeholder="Link (cian.ru, realty.yandex.ru, ...)" class="input" required autofocus />
+      <input v-model="form.url" :placeholder="$t('apartments.link')" class="input" required autofocus />
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <input v-model="form.title" placeholder="Title, e.g. 2-room near Sokol" class="input" />
-        <input v-model="form.address" placeholder="Address" class="input" />
+        <input v-model="form.title" :placeholder="$t('apartments.titlePlaceholder')" class="input" />
+        <input v-model="form.address" :placeholder="$t('apartments.address')" class="input" />
       </div>
       <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
         <div>
-          <label class="label">Price, ₽</label>
+          <label class="label">{{ $t('apartments.price') }}</label>
           <input v-model.number="form.price" type="number" min="0" step="1000" class="input" />
         </div>
         <div>
-          <label class="label">Rooms (0 = studio)</label>
+          <label class="label">{{ $t('apartments.rooms') }}</label>
           <input v-model.number="form.rooms" type="number" min="0" max="20" class="input" />
         </div>
         <div>
-          <label class="label">Area, m²</label>
+          <label class="label">{{ $t('apartments.area') }}</label>
           <input v-model.number="form.area" type="number" min="0" step="0.1" class="input" />
         </div>
         <div>
-          <label class="label">Floor</label>
+          <label class="label">{{ $t('apartments.floor') }}</label>
           <input v-model.number="form.floor" type="number" min="0" class="input" />
         </div>
         <div>
-          <label class="label">Total floors</label>
+          <label class="label">{{ $t('apartments.totalFloors') }}</label>
           <input v-model.number="form.total_floors" type="number" min="0" class="input" />
         </div>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-[12rem_1fr] gap-3">
         <div>
-          <label class="label">Status</label>
+          <label class="label">{{ $t('apartments.status') }}</label>
           <select v-model="form.status" class="input">
-            <option v-for="s in STATUS_OPTIONS" :key="s.value" :value="s.value" class="bg-[#12121f]">{{ s.label }}</option>
+            <option v-for="s in STATUS_OPTIONS" :key="s.value" :value="s.value" class="bg-[#12121f]">{{ $t('apartments.statuses.' + s.value) }}</option>
           </select>
         </div>
         <div>
-          <label class="label">Notes</label>
-          <textarea v-model="form.notes" rows="2" placeholder="Anything worth remembering: agent contact, viewing time, pros and cons..." class="input resize-y"></textarea>
+          <label class="label">{{ $t('apartments.notes') }}</label>
+          <textarea v-model="form.notes" rows="2" :placeholder="$t('apartments.notesPlaceholder')" class="input resize-y"></textarea>
         </div>
       </div>
       <div class="flex gap-2 pt-1">
-        <button type="submit" class="btn" :disabled="saving">{{ saving ? 'Saving...' : 'Save' }}</button>
-        <button type="button" @click="showForm = false" class="btn-secondary">Cancel</button>
+        <button type="submit" class="btn" :disabled="saving">{{ saving ? $t('common.saving') : $t('common.save') }}</button>
+        <button type="button" @click="showForm = false" class="btn-secondary">{{ $t('common.cancel') }}</button>
       </div>
     </form>
 
     <p v-if="error" class="text-sm text-red-500 mb-4">{{ error }}</p>
 
     <div class="flex items-center gap-2 flex-wrap mb-4">
-      <button @click="filterStatus = ''" class="tab-link" :class="filterStatus === '' && 'tab-active'">All <span class="text-gray-600 ml-1">{{ counts[''] }}</span></button>
+      <button @click="filterStatus = ''" class="tab-link" :class="filterStatus === '' && 'tab-active'">{{ $t('apartments.all') }} <span class="text-gray-600 ml-1">{{ counts[''] }}</span></button>
       <button v-for="s in STATUS_OPTIONS" :key="s.value" @click="filterStatus = s.value" class="tab-link" :class="filterStatus === s.value && 'tab-active'">
-        {{ s.label }} <span class="text-gray-600 ml-1">{{ counts[s.value] }}</span>
+        {{ $t('apartments.statuses.' + s.value) }} <span class="text-gray-600 ml-1">{{ counts[s.value] }}</span>
       </button>
       <div class="flex-1"></div>
       <div class="flex items-center gap-1">
-        <span class="text-xs text-gray-600 mr-1">Sort</span>
-        <button v-for="o in sortOptions" :key="o.value" @click="sortKey = o.value" class="tab-link-sm" :class="sortKey === o.value && 'tab-active'">{{ o.label }}</button>
+        <span class="text-xs text-gray-600 mr-1">{{ $t('apartments.sort') }}</span>
+        <button v-for="o in sortOptions" :key="o.value" @click="sortKey = o.value" class="tab-link-sm" :class="sortKey === o.value && 'tab-active'">{{ $t(o.label) }}</button>
       </div>
     </div>
 
-    <div v-if="loading" class="text-sm text-gray-500 py-10 text-center">Loading...</div>
+    <div v-if="loading" class="text-sm text-gray-500 py-10 text-center">{{ $t('common.loading') }}</div>
     <div v-else-if="!visible.length" class="bg-[#12121f] border border-dashed border-gray-800/60 rounded-2xl p-10 text-center">
-      <p class="text-gray-400 text-sm">{{ items.length ? 'Nothing with this status yet.' : 'No apartments yet. Add the first link.' }}</p>
-      <button v-if="!items.length" @click="openNew" class="btn mt-4">Add apartment</button>
+      <p class="text-gray-400 text-sm">{{ items.length ? $t('apartments.emptyFiltered') : $t('apartments.empty') }}</p>
+      <button v-if="!items.length" @click="openNew" class="btn mt-4">{{ $t('apartments.add') }}</button>
     </div>
     <div v-else class="space-y-3">
       <ApartmentCard v-for="a in visible" :key="a.id" :apartment="a" :criteria="activeCriteria" :current-user-id="auth.user?.id ?? 0"

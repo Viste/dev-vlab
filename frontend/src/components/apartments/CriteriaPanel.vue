@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import api from '../../api/client'
 import type { ApartmentCriterion } from '../../api/types'
 
 const props = defineProps<{ criteria: ApartmentCriterion[] }>()
 const emit = defineEmits<{ (e: 'changed'): void }>()
+
+const { t } = useI18n()
 
 const newLabel = ref('')
 const newWeight = ref(1)
@@ -18,7 +21,7 @@ async function run(fn: () => Promise<unknown>) {
     await fn()
     emit('changed')
   } catch (e: any) {
-    error.value = e.response?.data?.error || 'Request failed'
+    error.value = e.response?.data?.error || t('common.requestFailed')
   } finally {
     busy.value = false
   }
@@ -43,7 +46,7 @@ function update(c: ApartmentCriterion, patch: Partial<ApartmentCriterion>) {
 }
 
 function remove(c: ApartmentCriterion) {
-  if (!confirm(`Delete criterion "${c.label}"? Existing scores for it will be ignored.`)) return
+  if (!confirm(t('criteria.confirmDelete', { label: c.label }))) return
   run(() => api.delete(`/admin/apartment-criteria/${c.id}`))
 }
 
@@ -73,10 +76,10 @@ function onWeightChange(c: ApartmentCriterion, e: Event) {
 <template>
   <div class="bg-[#12121f] border border-gray-800/40 rounded-2xl p-5">
     <div class="flex items-center justify-between mb-1">
-      <h2 class="font-semibold">Rating criteria</h2>
-      <span class="text-xs text-gray-600">{{ criteria.filter((c) => c.is_active).length }} active</span>
+      <h2 class="font-semibold">{{ $t('criteria.title') }}</h2>
+      <span class="text-xs text-gray-600">{{ $t('criteria.activeCount', { n: criteria.filter((c) => c.is_active).length }) }}</span>
     </div>
-    <p class="text-xs text-gray-500 mb-4">Each apartment is scored 1–5 per criterion. Weight makes a criterion count more in the total. Inactive criteria are hidden from the form and excluded from scores.</p>
+    <p class="text-xs text-gray-500 mb-4">{{ $t('criteria.hint') }}</p>
 
     <div class="space-y-1.5">
       <div v-for="(c, i) in criteria" :key="c.id"
@@ -94,20 +97,20 @@ function onWeightChange(c: ApartmentCriterion, e: Event) {
         </label>
         <label class="flex items-center gap-1.5 text-xs text-gray-500 shrink-0 cursor-pointer select-none">
           <input type="checkbox" :checked="c.is_active" @change="update(c, { is_active: ($event.target as HTMLInputElement).checked })" class="accent-red-600" :disabled="busy" />
-          active
+          {{ $t('criteria.active') }}
         </label>
         <button @click="remove(c)" class="btn-sm-danger shrink-0" :disabled="busy">✕</button>
       </div>
-      <div v-if="!criteria.length" class="text-sm text-gray-500 px-2 py-3">No criteria yet.</div>
+      <div v-if="!criteria.length" class="text-sm text-gray-500 px-2 py-3">{{ $t('criteria.empty') }}</div>
     </div>
 
     <form @submit.prevent="add" class="flex items-center gap-2 mt-4 pt-4 border-t border-gray-800/40">
-      <input v-model="newLabel" placeholder="New criterion, e.g. Parking" class="input flex-1" :disabled="busy" />
+      <input v-model="newLabel" :placeholder="$t('criteria.newPlaceholder')" class="input flex-1" :disabled="busy" />
       <label class="flex items-center gap-1 text-xs text-gray-500 shrink-0">
         ×
         <input v-model.number="newWeight" type="number" step="0.5" min="0.5" max="10" class="input w-16 !px-2 text-center" :disabled="busy" />
       </label>
-      <button type="submit" class="btn shrink-0" :disabled="busy || !newLabel.trim()">Add</button>
+      <button type="submit" class="btn shrink-0" :disabled="busy || !newLabel.trim()">{{ $t('common.add') }}</button>
     </form>
     <p v-if="error" class="text-sm text-red-500 mt-2">{{ error }}</p>
   </div>

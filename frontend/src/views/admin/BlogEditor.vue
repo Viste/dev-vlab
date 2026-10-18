@@ -49,32 +49,32 @@ async function save() {
 
 <template>
   <div>
-    <h1 class="text-xl font-bold mb-6">{{ isEdit ? 'Edit Post' : 'New Post' }}</h1>
+    <h1 class="text-xl font-bold mb-6">{{ isEdit ? $t('blog.editPost') : $t('blog.newPost') }}</h1>
 
     <form @submit.prevent="save" class="space-y-4 max-w-3xl">
       <div>
-        <label class="label">Title</label>
+        <label class="label">{{ $t('common.title') }}</label>
         <input v-model="form.title" class="input" required />
       </div>
       <div>
-        <label class="label">Summary</label>
+        <label class="label">{{ $t('blog.summary') }}</label>
         <input v-model="form.summary" class="input" />
       </div>
       <div>
-        <label class="label">Cover URL</label>
+        <label class="label">{{ $t('common.coverUrl') }}</label>
         <input v-model="form.cover_url" class="input" />
       </div>
       <div>
-        <label class="label">Content (HTML)</label>
+        <label class="label">{{ $t('blog.content') }}</label>
         <textarea v-model="form.content" rows="15" class="input font-mono text-sm"></textarea>
       </div>
       <div class="flex items-center gap-2">
         <input type="checkbox" v-model="form.published" id="published" class="rounded" />
-        <label for="published" class="text-sm">Published</label>
+        <label for="published" class="text-sm">{{ $t('blog.published') }}</label>
       </div>
       <div class="flex gap-3">
-        <button type="submit" class="btn" :disabled="saving">{{ saving ? 'Saving...' : 'Save' }}</button>
-        <router-link to="/admin/blog" class="btn-secondary">Cancel</router-link>
+        <button type="submit" class="btn" :disabled="saving">{{ saving ? $t('common.saving') : $t('common.save') }}</button>
+        <router-link to="/admin/blog" class="btn-secondary">{{ $t('common.cancel') }}</router-link>
       </div>
     </form>
   </div>

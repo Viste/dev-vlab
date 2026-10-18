@@ -38,37 +38,37 @@ onMounted(load)
 
 <template>
   <div>
-    <h1 class="text-xl font-bold mb-6">Radio Stream</h1>
+    <h1 class="text-xl font-bold mb-6">{{ $t('radio.title') }}</h1>
 
     <div v-if="!editing">
       <div v-if="radio" class="bg-[#12121f] border border-gray-800/40 rounded-2xl p-5 space-y-2">
-        <p><span class="text-gray-500">Title:</span> {{ radio.title }}</p>
-        <p><span class="text-gray-500">URL:</span> {{ radio.stream_url }}</p>
-        <p><span class="text-gray-500">Active:</span> {{ radio.is_active ? 'Yes' : 'No' }}</p>
-        <button @click="startEdit" class="btn mt-3">Edit</button>
+        <p><span class="text-gray-500">{{ $t('common.title') }}:</span> {{ radio.title }}</p>
+        <p><span class="text-gray-500">{{ $t('common.url') }}:</span> {{ radio.stream_url }}</p>
+        <p><span class="text-gray-500">{{ $t('common.active') }}:</span> {{ radio.is_active ? $t('common.yes') : $t('common.no') }}</p>
+        <button @click="startEdit" class="btn mt-3">{{ $t('common.edit') }}</button>
       </div>
       <div v-else>
-        <p class="text-gray-500 mb-4">No radio stream configured.</p>
-        <button @click="editing = true" class="btn">Create Radio Stream</button>
+        <p class="text-gray-500 mb-4">{{ $t('radio.none') }}</p>
+        <button @click="editing = true" class="btn">{{ $t('radio.create') }}</button>
       </div>
     </div>
 
     <form v-else @submit.prevent="save" class="space-y-4 max-w-lg">
       <div>
-        <label class="label">Title</label>
+        <label class="label">{{ $t('common.title') }}</label>
         <input v-model="form.title" class="input" required />
       </div>
       <div>
-        <label class="label">Stream URL</label>
+        <label class="label">{{ $t('radio.streamUrl') }}</label>
         <input v-model="form.stream_url" class="input" required />
       </div>
       <div class="flex items-center gap-2">
         <input type="checkbox" v-model="form.is_active" id="active" />
-        <label for="active" class="text-sm">Active</label>
+        <label for="active" class="text-sm">{{ $t('common.active') }}</label>
       </div>
       <div class="flex gap-3">
-        <button type="submit" class="btn">Save</button>
-        <button type="button" @click="editing = false" class="btn-secondary">Cancel</button>
+        <button type="submit" class="btn">{{ $t('common.save') }}</button>
+        <button type="button" @click="editing = false" class="btn-secondary">{{ $t('common.cancel') }}</button>
       </div>
     </form>
   </div>

@@ -2,6 +2,9 @@
 import { ref, onMounted } from 'vue'
 import api from '../../api/client'
 import type { Project } from '../../api/types'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const items = ref<Project[]>([])
 const showForm = ref(false)
@@ -36,7 +39,7 @@ async function save() {
 }
 
 async function remove(id: number) {
-  if (!confirm('Delete?')) return
+  if (!confirm(t('common.confirmDelete'))) return
   await api.delete(`/admin/projects/${id}`)
   await load()
 }
@@ -47,19 +50,19 @@ onMounted(load)
 <template>
   <div>
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-xl font-bold">Projects</h1>
-      <button @click="openNew" class="btn">Add Project</button>
+      <h1 class="text-xl font-bold">{{ $t('projects.title') }}</h1>
+      <button @click="openNew" class="btn">{{ $t('projects.add') }}</button>
     </div>
 
     <div v-if="showForm" class="bg-[#12121f] border border-gray-800/40 rounded-2xl p-5 mb-6 space-y-3">
-      <input v-model="form.title" placeholder="Title" class="input" />
-      <input v-model="form.description" placeholder="Description" class="input" />
-      <input v-model="form.image_url" placeholder="Image URL" class="input" />
-      <input v-model="form.project_url" placeholder="Project URL" class="input" />
-      <input v-model.number="form.sort_order" type="number" placeholder="Sort Order" class="input w-32" />
+      <input v-model="form.title" :placeholder="$t('common.title')" class="input" />
+      <input v-model="form.description" :placeholder="$t('common.description')" class="input" />
+      <input v-model="form.image_url" :placeholder="$t('projects.imageUrl')" class="input" />
+      <input v-model="form.project_url" :placeholder="$t('projects.projectUrl')" class="input" />
+      <input v-model.number="form.sort_order" type="number" :placeholder="$t('common.sortOrder')" class="input w-32" />
       <div class="flex gap-2">
-        <button @click="save" class="btn">Save</button>
-        <button @click="showForm = false" class="btn-secondary">Cancel</button>
+        <button @click="save" class="btn">{{ $t('common.save') }}</button>
+        <button @click="showForm = false" class="btn-secondary">{{ $t('common.cancel') }}</button>
       </div>
     </div>
 
@@ -67,8 +70,8 @@ onMounted(load)
       <div v-for="item in items" :key="item.id" class="flex items-center justify-between bg-[#12121f] border border-gray-800/40 rounded-2xl p-4">
         <span>{{ item.title }}</span>
         <div class="flex gap-2">
-          <button @click="openEdit(item)" class="btn-sm">Edit</button>
-          <button @click="remove(item.id)" class="btn-sm-danger">Delete</button>
+          <button @click="openEdit(item)" class="btn-sm">{{ $t('common.edit') }}</button>
+          <button @click="remove(item.id)" class="btn-sm-danger">{{ $t('common.delete') }}</button>
         </div>
       </div>
     </div>

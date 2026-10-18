@@ -23,13 +23,13 @@ onMounted(async () => {
 })
 
 const cards = [
-  { key: 'posts', label: 'Blog Posts', color: 'text-blue-400 bg-blue-400/10', to: '/admin/blog',
+  { key: 'posts', label: 'dashboard.posts', color: 'text-blue-400 bg-blue-400/10', to: '/admin/blog',
     icon: 'M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z' },
-  { key: 'releases', label: 'Releases', color: 'text-emerald-400 bg-emerald-400/10', to: '/admin/releases',
+  { key: 'releases', label: 'dashboard.releases', color: 'text-emerald-400 bg-emerald-400/10', to: '/admin/releases',
     icon: 'M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z' },
-  { key: 'demos', label: 'Demos', color: 'text-amber-400 bg-amber-400/10', to: '/admin/demos',
+  { key: 'demos', label: 'dashboard.demos', color: 'text-amber-400 bg-amber-400/10', to: '/admin/demos',
     icon: 'M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z' },
-  { key: 'projects', label: 'Projects', color: 'text-purple-400 bg-purple-400/10', to: '/admin/projects',
+  { key: 'projects', label: 'dashboard.projects', color: 'text-purple-400 bg-purple-400/10', to: '/admin/projects',
     icon: 'M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6z' },
 ]
 </script>
@@ -37,8 +37,8 @@ const cards = [
 <template>
   <div>
     <div class="mb-8">
-      <h1 class="text-2xl font-bold">Dashboard</h1>
-      <p class="text-gray-500 text-sm mt-1">Welcome back, {{ auth.user?.username }}</p>
+      <h1 class="text-2xl font-bold">{{ $t('dashboard.title') }}</h1>
+      <p class="text-gray-500 text-sm mt-1">{{ $t('dashboard.welcome', { name: auth.user?.username }) }}</p>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -55,7 +55,7 @@ const cards = [
           </svg>
         </div>
         <div class="text-3xl font-bold">{{ (stats as any)[card.key] }}</div>
-        <div class="text-xs text-gray-500 mt-1">{{ card.label }}</div>
+        <div class="text-xs text-gray-500 mt-1">{{ $t(card.label) }}</div>
       </router-link>
     </div>
 
@@ -68,8 +68,8 @@ const cards = [
           </svg>
         </div>
         <div>
-          <div class="font-semibold">Radio Stream</div>
-          <div class="text-xs text-gray-500">Manage live radio</div>
+          <div class="font-semibold">{{ $t('dashboard.radio') }}</div>
+          <div class="text-xs text-gray-500">{{ $t('dashboard.radioHint') }}</div>
         </div>
       </router-link>
 
@@ -81,8 +81,8 @@ const cards = [
           </svg>
         </div>
         <div>
-          <div class="font-semibold">Navigation Links</div>
-          <div class="text-xs text-gray-500">Manage external links</div>
+          <div class="font-semibold">{{ $t('dashboard.navLinks') }}</div>
+          <div class="text-xs text-gray-500">{{ $t('dashboard.navLinksHint') }}</div>
         </div>
       </router-link>
 
@@ -94,8 +94,8 @@ const cards = [
           </svg>
         </div>
         <div>
-          <div class="font-semibold">Apartments</div>
-          <div class="text-xs text-gray-500">Flat hunting: links &amp; ratings</div>
+          <div class="font-semibold">{{ $t('dashboard.apartments') }}</div>
+          <div class="text-xs text-gray-500">{{ $t('dashboard.apartmentsHint') }}</div>
         </div>
       </router-link>
 
@@ -107,8 +107,8 @@ const cards = [
           </svg>
         </div>
         <div>
-          <div class="font-semibold">Users</div>
-          <div class="text-xs text-gray-500">Accounts, passwords, admin access</div>
+          <div class="font-semibold">{{ $t('dashboard.users') }}</div>
+          <div class="text-xs text-gray-500">{{ $t('dashboard.usersHint') }}</div>
         </div>
       </router-link>
     </div>

@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import api from '../../api/client'
 import type { BlogPost, PaginatedResponse } from '../../api/types'
 
 const router = useRouter()
+const { t } = useI18n()
 const posts = ref<BlogPost[]>([])
 const total = ref(0)
 const page = ref(1)
@@ -16,7 +18,7 @@ async function load() {
 }
 
 async function deletePost(id: number) {
-  if (!confirm('Delete this post?')) return
+  if (!confirm(t('blog.confirmDelete'))) return
   await api.delete(`/admin/blog/${id}`)
   await load()
 }
@@ -27,19 +29,19 @@ onMounted(load)
 <template>
   <div>
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-xl font-bold">Blog Posts</h1>
-      <router-link to="/admin/blog/new" class="btn">New Post</router-link>
+      <h1 class="text-xl font-bold">{{ $t('blog.title') }}</h1>
+      <router-link to="/admin/blog/new" class="btn">{{ $t('blog.newPost') }}</router-link>
     </div>
 
     <div class="space-y-2">
       <div v-for="post in posts" :key="post.id" class="flex items-center justify-between bg-[#12121f] border border-gray-800/40 rounded-2xl p-4">
         <div>
           <span class="font-medium">{{ post.title }}</span>
-          <span v-if="!post.published" class="ml-2 text-xs text-yellow-500 bg-yellow-500/10 px-2 py-0.5 rounded">Draft</span>
+          <span v-if="!post.published" class="ml-2 text-xs text-yellow-500 bg-yellow-500/10 px-2 py-0.5 rounded">{{ $t('blog.draft') }}</span>
         </div>
         <div class="flex gap-2">
-          <button @click="router.push(`/admin/blog/${post.id}/edit`)" class="btn-sm">Edit</button>
-          <button @click="deletePost(post.id)" class="btn-sm-danger">Delete</button>
+          <button @click="router.push(`/admin/blog/${post.id}/edit`)" class="btn-sm">{{ $t('common.edit') }}</button>
+          <button @click="deletePost(post.id)" class="btn-sm-danger">{{ $t('common.delete') }}</button>
         </div>
       </div>
     </div>

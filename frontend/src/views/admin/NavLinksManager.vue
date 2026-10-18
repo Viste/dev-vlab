@@ -2,6 +2,9 @@
 import { ref, onMounted } from 'vue'
 import api from '../../api/client'
 import type { NavigationLink } from '../../api/types'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const items = ref<NavigationLink[]>([])
 const showForm = ref(false)
@@ -36,7 +39,7 @@ async function save() {
 }
 
 async function remove(id: number) {
-  if (!confirm('Delete?')) return
+  if (!confirm(t('common.confirmDelete'))) return
   await api.delete(`/admin/nav-links/${id}`)
   await load()
 }
@@ -47,22 +50,22 @@ onMounted(load)
 <template>
   <div>
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-xl font-bold">Navigation Links</h1>
-      <button @click="openNew" class="btn">Add Link</button>
+      <h1 class="text-xl font-bold">{{ $t('navLinks.title') }}</h1>
+      <button @click="openNew" class="btn">{{ $t('navLinks.add') }}</button>
     </div>
 
     <div v-if="showForm" class="bg-[#12121f] border border-gray-800/40 rounded-2xl p-5 mb-6 space-y-3">
-      <input v-model="form.title" placeholder="Title" class="input" />
-      <input v-model="form.url" placeholder="URL" class="input" />
-      <input v-model="form.icon" placeholder="Icon (optional)" class="input" />
-      <input v-model.number="form.sort_order" type="number" placeholder="Sort Order" class="input w-32" />
+      <input v-model="form.title" :placeholder="$t('common.title')" class="input" />
+      <input v-model="form.url" :placeholder="$t('common.url')" class="input" />
+      <input v-model="form.icon" :placeholder="$t('navLinks.icon')" class="input" />
+      <input v-model.number="form.sort_order" type="number" :placeholder="$t('common.sortOrder')" class="input w-32" />
       <div class="flex items-center gap-2">
         <input type="checkbox" v-model="form.is_active" id="link-active" />
-        <label for="link-active" class="text-sm">Active</label>
+        <label for="link-active" class="text-sm">{{ $t('common.active') }}</label>
       </div>
       <div class="flex gap-2">
-        <button @click="save" class="btn">Save</button>
-        <button @click="showForm = false" class="btn-secondary">Cancel</button>
+        <button @click="save" class="btn">{{ $t('common.save') }}</button>
+        <button @click="showForm = false" class="btn-secondary">{{ $t('common.cancel') }}</button>
       </div>
     </div>
 
@@ -71,11 +74,11 @@ onMounted(load)
         <div>
           <span>{{ item.title }}</span>
           <span class="text-gray-500 text-sm ml-2">{{ item.url }}</span>
-          <span v-if="!item.is_active" class="ml-2 text-xs text-yellow-500">inactive</span>
+          <span v-if="!item.is_active" class="ml-2 text-xs text-yellow-500">{{ $t('common.inactive') }}</span>
         </div>
         <div class="flex gap-2">
-          <button @click="openEdit(item)" class="btn-sm">Edit</button>
-          <button @click="remove(item.id)" class="btn-sm-danger">Delete</button>
+          <button @click="openEdit(item)" class="btn-sm">{{ $t('common.edit') }}</button>
+          <button @click="remove(item.id)" class="btn-sm-danger">{{ $t('common.delete') }}</button>
         </div>
       </div>
     </div>
