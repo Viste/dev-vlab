@@ -54,6 +54,7 @@ func main() {
 	db.Exec(`ALTER TABLE "user" DROP CONSTRAINT IF EXISTS user_vk_id_key`)
 	db.Exec(`ALTER TABLE "user" DROP CONSTRAINT IF EXISTS uni_user_username`)
 	db.Exec(`ALTER TABLE "user" DROP CONSTRAINT IF EXISTS uni_user_email`)
+	db.Exec(`ALTER TABLE IF EXISTS apartment_criteria DROP COLUMN IF EXISTS label`)
 
 	if err := db.AutoMigrate(
 		&models.User{},

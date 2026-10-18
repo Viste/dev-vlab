@@ -38,6 +38,9 @@ async function loginVK() {
 }
 
 onMounted(() => {
+  if (route.query.error) {
+    error.value = String(route.query.error)
+  }
   const container = document.getElementById('telegram-login')
   if (container) {
     const script = document.createElement('script')

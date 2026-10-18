@@ -201,7 +201,7 @@ func (s *AuthService) TelegramCallback(data TelegramAuthData) (*models.User, err
 	user, err := s.repo.GetUserByTelegramID(tgID)
 	if err != nil {
 		username := data.Username
-		if username == "" {
+		if _, taken := s.repo.GetUserByUsername(username); username == "" || taken == nil {
 			username = fmt.Sprintf("tg_%d", data.ID)
 		}
 		user = &models.User{
@@ -213,7 +213,8 @@ func (s *AuthService) TelegramCallback(data TelegramAuthData) (*models.User, err
 			Provider:       "telegram",
 		}
 		if err := s.repo.CreateUser(user); err != nil {
-			return nil, fmt.Errorf("failed to create user: %w", err)
+			log.Printf("telegram user create failed: id=%d username=%s: %v", data.ID, username, err)
+			return nil, fmt.Errorf("failed to create user")
 		}
 	}
 	if user.IsBanned {

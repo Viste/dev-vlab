@@ -28,8 +28,8 @@ onMounted(async () => {
     auth.setToken(data.token)
     await auth.fetchUser()
     router.push('/')
-  } catch {
-    router.push('/login')
+  } catch (e: any) {
+    router.push({ path: '/login', query: { error: `Telegram: ${e.response?.data?.error || e.message}` } })
   }
 })
 </script>

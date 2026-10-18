@@ -23,8 +23,8 @@ onMounted(async () => {
     auth.setToken(data.token)
     await auth.fetchUser()
     router.push((route.query.redirect as string) || '/')
-  } catch {
-    router.push('/login')
+  } catch (e: any) {
+    router.push({ path: '/login', query: { error: `VK: ${e.response?.data?.error || e.message}` } })
   }
 })
 </script>
