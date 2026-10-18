@@ -153,9 +153,9 @@ function formatDate(s: string) {
         <span class="text-sm font-bold" :class="scoreClass(draftScore)">{{ formatScore(draftScore) }}</span>
       </div>
       <div v-if="!criteria.length" class="text-sm text-gray-500">{{ $t('apartments.noCriteria') }}</div>
-      <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5">
-        <div v-for="c in criteria" :key="c.key" class="flex items-center justify-between gap-3">
-          <span class="text-sm text-gray-300 truncate">
+      <div v-else class="space-y-2">
+        <div v-for="c in criteria" :key="c.key" class="flex items-center gap-4">
+          <span class="text-sm text-gray-300 w-72 shrink-0 truncate" :title="label(c)">
             {{ label(c) }}
             <span v-if="c.weight !== 1" class="text-[10px] text-gray-600 ml-1">×{{ c.weight }}</span>
           </span>
@@ -190,9 +190,9 @@ function formatDate(s: string) {
             {{ formatScore(r.score) }}
           </button>
         </div>
-        <div v-if="expanded[r.id]" class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 mt-3 pl-10">
-          <div v-for="e in ratedEntries(r.scores)" :key="e.key" class="flex items-center justify-between gap-3 text-xs">
-            <span class="text-gray-400 truncate">{{ e.label }}</span>
+        <div v-if="expanded[r.id]" class="space-y-1 mt-3 pl-10">
+          <div v-for="e in ratedEntries(r.scores)" :key="e.key" class="flex items-center gap-4 text-xs">
+            <span class="text-gray-400 w-72 shrink-0 truncate" :title="e.label">{{ e.label }}</span>
             <StarRating :model-value="e.value" readonly size="sm" />
           </div>
           <div v-if="!ratedEntries(r.scores).length" class="text-xs text-gray-600">{{ $t('apartments.noScores') }}</div>
