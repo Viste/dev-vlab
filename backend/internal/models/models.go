@@ -177,19 +177,20 @@ func (ApartmentCriterion) TableName() string { return "apartment_criteria" }
 type ApartmentCriterion struct {
 	ID        uint    `json:"id" gorm:"primaryKey"`
 	Key       string  `json:"key" gorm:"size:64;uniqueIndex;not null"`
-	Label     string  `json:"label" gorm:"size:128;not null"`
+	LabelEn   string  `json:"label_en" gorm:"size:128"`
+	LabelRu   string  `json:"label_ru" gorm:"size:128"`
 	Weight    float64 `json:"weight" gorm:"default:1"`
 	SortOrder int     `json:"sort_order" gorm:"default:0"`
 	IsActive  bool    `json:"is_active" gorm:"default:true"`
 }
 
 var DefaultApartmentCriteria = []ApartmentCriterion{
-	{Key: "location", Label: "Location & district", Weight: 1.5, SortOrder: 1, IsActive: true},
-	{Key: "price", Label: "Price / value", Weight: 1.5, SortOrder: 2, IsActive: true},
-	{Key: "layout", Label: "Layout", Weight: 1, SortOrder: 3, IsActive: true},
-	{Key: "condition", Label: "Condition & renovation", Weight: 1, SortOrder: 4, IsActive: true},
-	{Key: "transport", Label: "Transport & metro", Weight: 1, SortOrder: 5, IsActive: true},
-	{Key: "infrastructure", Label: "Shops, parks, infrastructure", Weight: 1, SortOrder: 6, IsActive: true},
-	{Key: "building", Label: "Building & entrance", Weight: 1, SortOrder: 7, IsActive: true},
-	{Key: "view", Label: "View, light & noise", Weight: 1, SortOrder: 8, IsActive: true},
+	{Key: "location", LabelEn: "Location & district", LabelRu: "Расположение и район", Weight: 1.5, SortOrder: 1, IsActive: true},
+	{Key: "price", LabelEn: "Price / value", LabelRu: "Цена / выгода", Weight: 1.5, SortOrder: 2, IsActive: true},
+	{Key: "layout", LabelEn: "Layout", LabelRu: "Планировка", Weight: 1, SortOrder: 3, IsActive: true},
+	{Key: "condition", LabelEn: "Condition & renovation", LabelRu: "Состояние и ремонт", Weight: 1, SortOrder: 4, IsActive: true},
+	{Key: "transport", LabelEn: "Transport & metro", LabelRu: "Транспорт и метро", Weight: 1, SortOrder: 5, IsActive: true},
+	{Key: "infrastructure", LabelEn: "Shops, parks, infrastructure", LabelRu: "Магазины, парки, инфраструктура", Weight: 1, SortOrder: 6, IsActive: true},
+	{Key: "building", LabelEn: "Building & entrance", LabelRu: "Дом и подъезд", Weight: 1, SortOrder: 7, IsActive: true},
+	{Key: "view", LabelEn: "View, light & noise", LabelRu: "Вид, свет и шум", Weight: 1, SortOrder: 8, IsActive: true},
 }

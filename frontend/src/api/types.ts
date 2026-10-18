@@ -92,7 +92,8 @@ export type ApartmentSource = 'cian' | 'yandex' | 'avito' | 'domclick' | 'other'
 export interface ApartmentCriterion {
   id: number
   key: string
-  label: string
+  label_en: string
+  label_ru: string
   weight: number
   sort_order: number
   is_active: boolean

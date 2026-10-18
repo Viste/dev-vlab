@@ -165,7 +165,8 @@ export default {
     hint: 'Each apartment is scored 1–5 per criterion. Weight makes a criterion count more in the total. Inactive criteria are hidden from the form and excluded from scores.',
     active: 'active',
     empty: 'No criteria yet.',
-    newPlaceholder: 'New criterion, e.g. Parking',
+    nameEn: 'Name in English, e.g. Parking',
+    nameRu: 'Name in Russian, e.g. Парковка',
     confirmDelete: 'Delete criterion "{label}"? Existing scores for it will be ignored.',
   },
   users: {

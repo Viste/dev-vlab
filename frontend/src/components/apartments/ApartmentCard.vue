@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n'
 import type { Apartment, ApartmentCriterion, ApartmentStatus } from '../../api/types'
 import { dateLocales, type Locale } from '../../i18n'
 import StarRating from './StarRating.vue'
-import { STATUS_OPTIONS, statusMeta, sourceKey, sourceClass, formatPrice, scoreClass, formatScore, displayName } from './apartments'
+import { STATUS_OPTIONS, statusMeta, sourceKey, sourceClass, formatPrice, scoreClass, formatScore, displayName, criterionLabel } from './apartments'
 
 const props = defineProps<{
   apartment: Apartment
@@ -82,12 +82,12 @@ function removeRating() {
   rating.value = false
 }
 
-function labelFor(key: string) {
-  return props.criteria.find((c) => c.key === key)?.label ?? key
+function label(c: ApartmentCriterion) {
+  return criterionLabel(c, locale.value as Locale)
 }
 
 function ratedEntries(scores: Record<string, number>) {
-  return props.criteria.filter((c) => (scores?.[c.key] ?? 0) > 0).map((c) => ({ key: c.key, label: c.label, value: scores[c.key]! }))
+  return props.criteria.filter((c) => (scores?.[c.key] ?? 0) > 0).map((c) => ({ key: c.key, label: label(c), value: scores[c.key]! }))
 }
 
 function name(u?: Parameters<typeof displayName>[0]) {
@@ -156,7 +156,7 @@ function formatDate(s: string) {
       <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5">
         <div v-for="c in criteria" :key="c.key" class="flex items-center justify-between gap-3">
           <span class="text-sm text-gray-300 truncate">
-            {{ c.label }}
+            {{ label(c) }}
             <span v-if="c.weight !== 1" class="text-[10px] text-gray-600 ml-1">×{{ c.weight }}</span>
           </span>
           <StarRating v-model="draftScores[c.key]" />
@@ -192,7 +192,7 @@ function formatDate(s: string) {
         </div>
         <div v-if="expanded[r.id]" class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 mt-3 pl-10">
           <div v-for="e in ratedEntries(r.scores)" :key="e.key" class="flex items-center justify-between gap-3 text-xs">
-            <span class="text-gray-400 truncate">{{ labelFor(e.key) }}</span>
+            <span class="text-gray-400 truncate">{{ e.label }}</span>
             <StarRating :model-value="e.value" readonly size="sm" />
           </div>
           <div v-if="!ratedEntries(r.scores).length" class="text-xs text-gray-600">{{ $t('apartments.noScores') }}</div>

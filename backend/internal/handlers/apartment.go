@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"math"
 	"net/http"
 	"net/url"
@@ -12,6 +13,7 @@ import (
 	"dev-vlab/internal/repository"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gosimple/slug"
 )
 
 type ApartmentHandler struct {
@@ -394,23 +396,31 @@ func (h *ApartmentHandler) ListCriteria(c *gin.Context) {
 	c.JSON(http.StatusOK, items)
 }
 
-func slugKey(s string) string {
-	var b strings.Builder
-	for _, r := range strings.ToLower(strings.TrimSpace(s)) {
-		switch {
-		case r >= 'a' && r <= 'z', r >= '0' && r <= '9':
-			b.WriteRune(r)
-		case r == ' ', r == '-', r == '_':
-			b.WriteRune('_')
+func criterionKey(candidates []string, taken map[string]bool) string {
+	key := ""
+	for _, s := range candidates {
+		if key = strings.ReplaceAll(slug.Make(s), "-", "_"); key != "" {
+			break
 		}
 	}
-	return strings.Trim(b.String(), "_")
+	if key == "" {
+		key = "criterion"
+	}
+	if len(key) > 60 {
+		key = key[:60]
+	}
+	unique := key
+	for i := 2; taken[unique]; i++ {
+		unique = fmt.Sprintf("%s_%d", key, i)
+	}
+	return unique
 }
 
 func (h *ApartmentHandler) CreateCriterion(c *gin.Context) {
 	var req struct {
 		Key       string   `json:"key"`
-		Label     string   `json:"label" binding:"required,min=1,max=128"`
+		LabelEn   string   `json:"label_en"`
+		LabelRu   string   `json:"label_ru"`
 		Weight    *float64 `json:"weight"`
 		SortOrder *int     `json:"sort_order"`
 		IsActive  *bool    `json:"is_active"`
@@ -420,19 +430,34 @@ func (h *ApartmentHandler) CreateCriterion(c *gin.Context) {
 		return
 	}
 
-	key := slugKey(req.Key)
-	if key == "" {
-		key = slugKey(req.Label)
-	}
-	if key == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "key must contain latin letters or digits"})
+	labelEn := strings.TrimSpace(req.LabelEn)
+	labelRu := strings.TrimSpace(req.LabelRu)
+	if labelEn == "" && labelRu == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "label is required in at least one language"})
 		return
 	}
-	if len(key) > 64 {
-		key = key[:64]
+	if len(labelEn) > 128 || len(labelRu) > 128 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "label must be at most 128 chars"})
+		return
 	}
 
-	item := models.ApartmentCriterion{Key: key, Label: strings.TrimSpace(req.Label), Weight: 1, IsActive: true}
+	existing, err := h.repo.GetApartmentCriteria(false)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to load criteria"})
+		return
+	}
+	taken := make(map[string]bool, len(existing))
+	for _, e := range existing {
+		taken[e.Key] = true
+	}
+
+	item := models.ApartmentCriterion{
+		Key:      criterionKey([]string{req.Key, labelEn, labelRu}, taken),
+		LabelEn:  labelEn,
+		LabelRu:  labelRu,
+		Weight:   1,
+		IsActive: true,
+	}
 	if req.Weight != nil {
 		if *req.Weight <= 0 || *req.Weight > 10 {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "weight must be within 0..10"})
@@ -445,14 +470,6 @@ func (h *ApartmentHandler) CreateCriterion(c *gin.Context) {
 	}
 	if req.IsActive != nil {
 		item.IsActive = *req.IsActive
-	}
-
-	existing, _ := h.repo.GetApartmentCriteria(false)
-	for _, e := range existing {
-		if e.Key == key {
-			c.JSON(http.StatusConflict, gin.H{"error": "criterion with this key already exists"})
-			return
-		}
 	}
 
 	if err := h.repo.CreateApartmentCriterion(&item); err != nil {
@@ -474,7 +491,8 @@ func (h *ApartmentHandler) UpdateCriterion(c *gin.Context) {
 	}
 
 	var req struct {
-		Label     *string  `json:"label"`
+		LabelEn   *string  `json:"label_en"`
+		LabelRu   *string  `json:"label_ru"`
 		Weight    *float64 `json:"weight"`
 		SortOrder *int     `json:"sort_order"`
 		IsActive  *bool    `json:"is_active"`
@@ -483,13 +501,19 @@ func (h *ApartmentHandler) UpdateCriterion(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if req.Label != nil {
-		label := strings.TrimSpace(*req.Label)
-		if label == "" || len(label) > 128 {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "label must be 1..128 chars"})
-			return
-		}
-		item.Label = label
+	if req.LabelEn != nil {
+		item.LabelEn = strings.TrimSpace(*req.LabelEn)
+	}
+	if req.LabelRu != nil {
+		item.LabelRu = strings.TrimSpace(*req.LabelRu)
+	}
+	if item.LabelEn == "" && item.LabelRu == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "label is required in at least one language"})
+		return
+	}
+	if len(item.LabelEn) > 128 || len(item.LabelRu) > 128 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "label must be at most 128 chars"})
+		return
 	}
 	if req.Weight != nil {
 		if *req.Weight <= 0 || *req.Weight > 10 {

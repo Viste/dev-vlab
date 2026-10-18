@@ -1,4 +1,5 @@
-import type { ApartmentSource, ApartmentStatus } from '../../api/types'
+import type { ApartmentCriterion, ApartmentSource, ApartmentStatus } from '../../api/types'
+import type { Locale } from '../../i18n'
 
 export const STATUS_OPTIONS: { value: ApartmentStatus; cls: string }[] = [
   { value: 'new', cls: 'text-gray-300 bg-white/5' },
@@ -14,6 +15,10 @@ export const SOURCE_CLS: Record<ApartmentSource, string> = {
   avito: 'bg-emerald-500/15 text-emerald-300',
   domclick: 'bg-teal-500/15 text-teal-300',
   other: 'bg-white/5 text-gray-400',
+}
+
+export function criterionLabel(c: Pick<ApartmentCriterion, 'label_en' | 'label_ru'>, locale: Locale) {
+  return locale === 'ru' ? c.label_ru || c.label_en : c.label_en || c.label_ru
 }
 
 export function statusMeta(status: ApartmentStatus) {
