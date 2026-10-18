@@ -16,3 +16,6 @@ frontend/dist/
 *.swo
 *~
 Thumbs.db
+
+# Playwright MCP output
+.playwright-mcp/

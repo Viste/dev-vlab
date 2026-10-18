@@ -85,3 +85,53 @@ export interface PaginatedResponse<T> {
   page: number
   limit: number
 }
+
+export type ApartmentStatus = 'new' | 'scheduled' | 'visited' | 'shortlist' | 'rejected'
+export type ApartmentSource = 'cian' | 'yandex' | 'avito' | 'domclick' | 'other'
+
+export interface ApartmentCriterion {
+  id: number
+  key: string
+  label: string
+  weight: number
+  sort_order: number
+  is_active: boolean
+}
+
+export interface ApartmentRating {
+  id: number
+  apartment_id: number
+  user_id: number
+  scores: Record<string, number>
+  comment?: string
+  score: number
+  user?: User
+  created_at: string
+  updated_at: string
+}
+
+export interface Apartment {
+  id: number
+  url: string
+  source: ApartmentSource
+  title: string
+  address?: string
+  price: number
+  rooms: number
+  area: number
+  floor: number
+  total_floors: number
+  notes?: string
+  status: ApartmentStatus
+  created_by: number
+  created_at: string
+  updated_at: string
+  creator?: User
+  ratings: ApartmentRating[]
+  score: number
+}
+
+export interface AdminUser extends User {
+  is_banned: boolean
+  updated_at: string
+}

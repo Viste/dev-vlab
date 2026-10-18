@@ -171,6 +171,9 @@ func (s *AuthService) VKCallback(code, state, deviceID string) (*models.User, er
 			return nil, fmt.Errorf("failed to create user: %w", err)
 		}
 	}
+	if user.IsBanned {
+		return nil, fmt.Errorf("account is banned")
+	}
 
 	return user, nil
 }
@@ -212,6 +215,9 @@ func (s *AuthService) TelegramCallback(data TelegramAuthData) (*models.User, err
 		if err := s.repo.CreateUser(user); err != nil {
 			return nil, fmt.Errorf("failed to create user: %w", err)
 		}
+	}
+	if user.IsBanned {
+		return nil, fmt.Errorf("account is banned")
 	}
 
 	return user, nil

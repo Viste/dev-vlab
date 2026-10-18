@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"fmt"
+
 	"dev-vlab/internal/models"
 
 	"gorm.io/gorm"
@@ -255,4 +257,148 @@ func (r *Repository) UpdateNavLink(link *models.NavigationLink) error {
 
 func (r *Repository) DeleteNavLink(id uint) error {
 	return r.db.Delete(&models.NavigationLink{}, id).Error
+}
+
+// --- Users (admin) ---
+
+func (r *Repository) GetUsers() ([]models.User, error) {
+	var users []models.User
+	err := r.db.Order("id ASC").Find(&users).Error
+	return users, err
+}
+
+func (r *Repository) DeleteUser(id uint) error {
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		var user models.User
+		if err := tx.First(&user, id).Error; err != nil {
+			return err
+		}
+		freed := fmt.Sprintf("deleted_%d_%s", user.ID, user.Username)
+		if len(freed) > 64 {
+			freed = freed[:64]
+		}
+		if err := tx.Model(&user).Update("username", freed).Error; err != nil {
+			return err
+		}
+		return tx.Delete(&user).Error
+	})
+}
+
+// --- Apartments ---
+
+func (r *Repository) apartmentQuery() *gorm.DB {
+	return r.db.
+		Preload("Creator").
+		Preload("Ratings", func(db *gorm.DB) *gorm.DB {
+			return db.Order("apartment_ratings.updated_at ASC")
+		}).
+		Preload("Ratings.User")
+}
+
+func (r *Repository) GetApartments(status string) ([]models.Apartment, error) {
+	var items []models.Apartment
+	q := r.apartmentQuery()
+	if status != "" {
+		q = q.Where("status = ?", status)
+	}
+	err := q.Order("created_at DESC").Find(&items).Error
+	return items, err
+}
+
+func (r *Repository) GetApartmentByID(id uint) (*models.Apartment, error) {
+	var item models.Apartment
+	err := r.apartmentQuery().First(&item, id).Error
+	return &item, err
+}
+
+func (r *Repository) CreateApartment(item *models.Apartment) error {
+	return r.db.Create(item).Error
+}
+
+func (r *Repository) UpdateApartment(item *models.Apartment) error {
+	return r.db.Omit("Creator", "Ratings").Save(item).Error
+}
+
+func (r *Repository) DeleteApartment(id uint) error {
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Where("apartment_id = ?", id).Delete(&models.ApartmentRating{}).Error; err != nil {
+			return err
+		}
+		return tx.Delete(&models.Apartment{}, id).Error
+	})
+}
+
+func (r *Repository) CountApartments() (int64, error) {
+	var n int64
+	err := r.db.Model(&models.Apartment{}).Count(&n).Error
+	return n, err
+}
+
+// --- Apartment ratings ---
+
+func (r *Repository) GetApartmentRating(apartmentID, userID uint) (*models.ApartmentRating, error) {
+	var rating models.ApartmentRating
+	err := r.db.Where("apartment_id = ? AND user_id = ?", apartmentID, userID).First(&rating).Error
+	return &rating, err
+}
+
+func (r *Repository) UpsertApartmentRating(rating *models.ApartmentRating) error {
+	existing, err := r.GetApartmentRating(rating.ApartmentID, rating.UserID)
+	if err == nil {
+		existing.Scores = rating.Scores
+		existing.Comment = rating.Comment
+		if err := r.db.Omit("User").Save(existing).Error; err != nil {
+			return err
+		}
+		*rating = *existing
+		return nil
+	}
+	return r.db.Omit("User").Create(rating).Error
+}
+
+func (r *Repository) DeleteApartmentRating(apartmentID, userID uint) error {
+	return r.db.Where("apartment_id = ? AND user_id = ?", apartmentID, userID).Delete(&models.ApartmentRating{}).Error
+}
+
+// --- Apartment criteria ---
+
+func (r *Repository) GetApartmentCriteria(activeOnly bool) ([]models.ApartmentCriterion, error) {
+	var items []models.ApartmentCriterion
+	q := r.db.Order("sort_order ASC, id ASC")
+	if activeOnly {
+		q = q.Where("is_active = ?", true)
+	}
+	err := q.Find(&items).Error
+	return items, err
+}
+
+func (r *Repository) GetApartmentCriterionByID(id uint) (*models.ApartmentCriterion, error) {
+	var item models.ApartmentCriterion
+	err := r.db.First(&item, id).Error
+	return &item, err
+}
+
+func (r *Repository) CreateApartmentCriterion(item *models.ApartmentCriterion) error {
+	return r.db.Create(item).Error
+}
+
+func (r *Repository) UpdateApartmentCriterion(item *models.ApartmentCriterion) error {
+	return r.db.Save(item).Error
+}
+
+func (r *Repository) DeleteApartmentCriterion(id uint) error {
+	return r.db.Delete(&models.ApartmentCriterion{}, id).Error
+}
+
+func (r *Repository) SeedApartmentCriteria() error {
+	var n int64
+	if err := r.db.Model(&models.ApartmentCriterion{}).Count(&n).Error; err != nil {
+		return err
+	}
+	if n > 0 {
+		return nil
+	}
+	defaults := make([]models.ApartmentCriterion, len(models.DefaultApartmentCriteria))
+	copy(defaults, models.DefaultApartmentCriteria)
+	return r.db.Create(&defaults).Error
 }

@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"errors"
 	"net/http"
 	"strings"
 
@@ -9,62 +10,76 @@ import (
 )
 
 type Claims struct {
-	UserID  uint   `json:"user_id"`
-	IsAdmin bool   `json:"is_admin"`
+	UserID  uint `json:"user_id"`
+	IsAdmin bool `json:"is_admin"`
 	jwt.RegisteredClaims
 }
 
-func JWTAuth(secret string) gin.HandlerFunc {
+type UserChecker func(id uint) (isAdmin bool, ok bool)
+
+var (
+	errNoHeader      = errors.New("authorization header required")
+	errInvalidHeader = errors.New("invalid authorization header")
+	errInvalidToken  = errors.New("invalid token")
+)
+
+func parseClaims(c *gin.Context, secret string) (*Claims, error) {
+	header := c.GetHeader("Authorization")
+	if header == "" {
+		return nil, errNoHeader
+	}
+
+	parts := strings.SplitN(header, " ", 2)
+	if len(parts) != 2 || parts[0] != "Bearer" {
+		return nil, errInvalidHeader
+	}
+
+	claims := &Claims{}
+	token, err := jwt.ParseWithClaims(parts[1], claims, func(t *jwt.Token) (interface{}, error) {
+		return []byte(secret), nil
+	})
+	if err != nil || !token.Valid {
+		return nil, errInvalidToken
+	}
+	return claims, nil
+}
+
+func resolve(claims *Claims, check UserChecker) (isAdmin bool, ok bool) {
+	if check == nil {
+		return claims.IsAdmin, true
+	}
+	return check(claims.UserID)
+}
+
+func JWTAuth(secret string, check UserChecker) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		header := c.GetHeader("Authorization")
-		if header == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "authorization header required"})
+		claims, err := parseClaims(c, secret)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return
 		}
 
-		parts := strings.SplitN(header, " ", 2)
-		if len(parts) != 2 || parts[0] != "Bearer" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid authorization header"})
-			return
-		}
-
-		claims := &Claims{}
-		token, err := jwt.ParseWithClaims(parts[1], claims, func(t *jwt.Token) (interface{}, error) {
-			return []byte(secret), nil
-		})
-		if err != nil || !token.Valid {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
+		isAdmin, ok := resolve(claims, check)
+		if !ok {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "account disabled"})
 			return
 		}
 
 		c.Set("user_id", claims.UserID)
-		c.Set("is_admin", claims.IsAdmin)
+		c.Set("is_admin", isAdmin)
 		c.Next()
 	}
 }
 
 // OptionalAuth extracts user info if token present, but doesn't block
-func OptionalAuth(secret string) gin.HandlerFunc {
+func OptionalAuth(secret string, check UserChecker) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		header := c.GetHeader("Authorization")
-		if header == "" {
-			c.Next()
-			return
-		}
-
-		parts := strings.SplitN(header, " ", 2)
-		if len(parts) != 2 || parts[0] != "Bearer" {
-			c.Next()
-			return
-		}
-
-		claims := &Claims{}
-		token, err := jwt.ParseWithClaims(parts[1], claims, func(t *jwt.Token) (interface{}, error) {
-			return []byte(secret), nil
-		})
-		if err == nil && token.Valid {
-			c.Set("user_id", claims.UserID)
-			c.Set("is_admin", claims.IsAdmin)
+		claims, err := parseClaims(c, secret)
+		if err == nil {
+			if isAdmin, ok := resolve(claims, check); ok {
+				c.Set("user_id", claims.UserID)
+				c.Set("is_admin", isAdmin)
+			}
 		}
 		c.Next()
 	}

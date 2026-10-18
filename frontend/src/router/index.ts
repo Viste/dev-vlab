@@ -33,6 +33,8 @@ const router = createRouter({
         { path: 'radio', name: 'admin-radio', component: () => import('../views/admin/RadioManager.vue') },
         { path: 'projects', name: 'admin-projects', component: () => import('../views/admin/ProjectsManager.vue') },
         { path: 'nav-links', name: 'admin-nav-links', component: () => import('../views/admin/NavLinksManager.vue') },
+        { path: 'apartments', name: 'admin-apartments', component: () => import('../views/admin/ApartmentsManager.vue') },
+        { path: 'users', name: 'admin-users', component: () => import('../views/admin/UsersManager.vue') },
       ],
     },
   ],

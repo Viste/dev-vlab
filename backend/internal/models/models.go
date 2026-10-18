@@ -108,3 +108,88 @@ type NavigationLink struct {
 	SortOrder int    `json:"sort_order" gorm:"default:0"`
 	IsActive  bool   `json:"is_active" gorm:"default:true"`
 }
+
+const (
+	ApartmentStatusNew       = "new"
+	ApartmentStatusScheduled = "scheduled"
+	ApartmentStatusVisited   = "visited"
+	ApartmentStatusShortlist = "shortlist"
+	ApartmentStatusRejected  = "rejected"
+)
+
+var ApartmentStatuses = []string{
+	ApartmentStatusNew,
+	ApartmentStatusScheduled,
+	ApartmentStatusVisited,
+	ApartmentStatusShortlist,
+	ApartmentStatusRejected,
+}
+
+func IsValidApartmentStatus(s string) bool {
+	for _, v := range ApartmentStatuses {
+		if v == s {
+			return true
+		}
+	}
+	return false
+}
+
+type Apartment struct {
+	ID          uint           `json:"id" gorm:"primaryKey"`
+	URL         string         `json:"url" gorm:"size:1024;not null"`
+	Source      string         `json:"source" gorm:"size:32;index"`
+	Title       string         `json:"title" gorm:"size:255"`
+	Address     string         `json:"address,omitempty" gorm:"size:512"`
+	Price       int64          `json:"price" gorm:"default:0"`
+	Rooms       int            `json:"rooms" gorm:"default:0"`
+	Area        float64        `json:"area" gorm:"default:0"`
+	Floor       int            `json:"floor" gorm:"default:0"`
+	TotalFloors int            `json:"total_floors" gorm:"default:0"`
+	Notes       string         `json:"notes,omitempty" gorm:"type:text"`
+	Status      string         `json:"status" gorm:"size:32;default:'new';index"`
+	CreatedBy   uint           `json:"created_by" gorm:"index"`
+	CreatedAt   time.Time      `json:"created_at"`
+	UpdatedAt   time.Time      `json:"updated_at"`
+	DeletedAt   gorm.DeletedAt `json:"-" gorm:"index"`
+
+	Creator *User             `json:"creator,omitempty" gorm:"foreignKey:CreatedBy"`
+	Ratings []ApartmentRating `json:"ratings" gorm:"foreignKey:ApartmentID"`
+
+	Score float64 `json:"score" gorm:"-"`
+}
+
+type ApartmentRating struct {
+	ID          uint           `json:"id" gorm:"primaryKey"`
+	ApartmentID uint           `json:"apartment_id" gorm:"uniqueIndex:idx_apartment_rating_user;not null"`
+	UserID      uint           `json:"user_id" gorm:"uniqueIndex:idx_apartment_rating_user;not null"`
+	Scores      map[string]int `json:"scores" gorm:"type:text;serializer:json"`
+	Comment     string         `json:"comment,omitempty" gorm:"type:text"`
+	CreatedAt   time.Time      `json:"created_at"`
+	UpdatedAt   time.Time      `json:"updated_at"`
+
+	User *User `json:"user,omitempty" gorm:"foreignKey:UserID"`
+
+	Score float64 `json:"score" gorm:"-"`
+}
+
+func (ApartmentCriterion) TableName() string { return "apartment_criteria" }
+
+type ApartmentCriterion struct {
+	ID        uint    `json:"id" gorm:"primaryKey"`
+	Key       string  `json:"key" gorm:"size:64;uniqueIndex;not null"`
+	Label     string  `json:"label" gorm:"size:128;not null"`
+	Weight    float64 `json:"weight" gorm:"default:1"`
+	SortOrder int     `json:"sort_order" gorm:"default:0"`
+	IsActive  bool    `json:"is_active" gorm:"default:true"`
+}
+
+var DefaultApartmentCriteria = []ApartmentCriterion{
+	{Key: "location", Label: "Location & district", Weight: 1.5, SortOrder: 1, IsActive: true},
+	{Key: "price", Label: "Price / value", Weight: 1.5, SortOrder: 2, IsActive: true},
+	{Key: "layout", Label: "Layout", Weight: 1, SortOrder: 3, IsActive: true},
+	{Key: "condition", Label: "Condition & renovation", Weight: 1, SortOrder: 4, IsActive: true},
+	{Key: "transport", Label: "Transport & metro", Weight: 1, SortOrder: 5, IsActive: true},
+	{Key: "infrastructure", Label: "Shops, parks, infrastructure", Weight: 1, SortOrder: 6, IsActive: true},
+	{Key: "building", Label: "Building & entrance", Weight: 1, SortOrder: 7, IsActive: true},
+	{Key: "view", Label: "View, light & noise", Weight: 1, SortOrder: 8, IsActive: true},
+}

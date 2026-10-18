@@ -85,6 +85,32 @@ const cards = [
           <div class="text-xs text-gray-500">Manage external links</div>
         </div>
       </router-link>
+
+      <router-link to="/admin/apartments"
+        class="bg-[#12121f] border border-gray-800/40 rounded-2xl p-5 hover:border-gray-700/50 transition flex items-center gap-4">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center text-pink-400 bg-pink-400/10">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+          </svg>
+        </div>
+        <div>
+          <div class="font-semibold">Apartments</div>
+          <div class="text-xs text-gray-500">Flat hunting: links &amp; ratings</div>
+        </div>
+      </router-link>
+
+      <router-link to="/admin/users"
+        class="bg-[#12121f] border border-gray-800/40 rounded-2xl p-5 hover:border-gray-700/50 transition flex items-center gap-4">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center text-orange-400 bg-orange-400/10">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+        </div>
+        <div>
+          <div class="font-semibold">Users</div>
+          <div class="text-xs text-gray-500">Accounts, passwords, admin access</div>
+        </div>
+      </router-link>
     </div>
   </div>
 </template>

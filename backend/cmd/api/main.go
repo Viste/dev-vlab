@@ -64,6 +64,9 @@ func main() {
 		&models.RadioStream{},
 		&models.Project{},
 		&models.NavigationLink{},
+		&models.Apartment{},
+		&models.ApartmentRating{},
+		&models.ApartmentCriterion{},
 	); err != nil {
 		log.Printf("warning: auto-migrate: %v", err)
 	}
@@ -78,7 +81,20 @@ func main() {
 	}
 
 	repo := repository.New(db)
+	if err := repo.SeedApartmentCriteria(); err != nil {
+		log.Printf("warning: seed apartment criteria: %v", err)
+	}
 	authService := services.NewAuthService(cfg, repo, rdb)
+
+	checkUser := middleware.UserChecker(func(id uint) (bool, bool) {
+		u, err := repo.GetUserByID(id)
+		if err != nil || u.IsBanned {
+			return false, false
+		}
+		return u.IsAdmin, true
+	})
+	authRequired := middleware.JWTAuth(cfg.JWTSecret, checkUser)
+	authOptional := middleware.OptionalAuth(cfg.JWTSecret, checkUser)
 
 	saturatorHandler := handlers.NewSaturatorHandler(rdb)
 	authHandler := handlers.NewAuthHandler(authService)
@@ -87,6 +103,8 @@ func main() {
 	projectHandler := handlers.NewProjectHandler(repo)
 	userHandler := handlers.NewUserHandler(repo, authService)
 	navLinkHandler := handlers.NewNavLinkHandler(repo)
+	apartmentHandler := handlers.NewApartmentHandler(repo)
+	adminUserHandler := handlers.NewAdminUserHandler(repo)
 
 	if cfg.Env == "production" {
 		gin.SetMode(gin.ReleaseMode)
@@ -113,16 +131,16 @@ func main() {
 			auth.GET("/vk", authHandler.VKLogin)
 			auth.POST("/vk/callback", authHandler.VKCallback)
 			auth.POST("/telegram/callback", authHandler.TelegramCallback)
-			auth.GET("/me", middleware.JWTAuth(cfg.JWTSecret), authHandler.Me)
+			auth.GET("/me", authRequired, authHandler.Me)
 		}
 
 		blog := api.Group("/blog")
-		blog.Use(middleware.OptionalAuth(cfg.JWTSecret))
+		blog.Use(authOptional)
 		{
 			blog.GET("", blogHandler.ListPosts)
 			blog.GET("/:slug", blogHandler.GetPost)
-			blog.POST("/:slug/comments", middleware.JWTAuth(cfg.JWTSecret), blogHandler.AddComment)
-			blog.DELETE("/comments/:id", middleware.JWTAuth(cfg.JWTSecret), blogHandler.DeleteComment)
+			blog.POST("/:slug/comments", authRequired, blogHandler.AddComment)
+			blog.DELETE("/comments/:id", authRequired, blogHandler.DeleteComment)
 		}
 
 		music := api.Group("/music")
@@ -139,7 +157,7 @@ func main() {
 		api.GET("/saturator/version", saturatorHandler.GetVersion)
 
 		user := api.Group("/user")
-		user.Use(middleware.JWTAuth(cfg.JWTSecret))
+		user.Use(authRequired)
 		{
 			user.GET("/profile", userHandler.GetProfile)
 			user.PUT("/profile", userHandler.UpdateProfile)
@@ -148,7 +166,7 @@ func main() {
 		}
 
 		admin := api.Group("/admin")
-		admin.Use(middleware.JWTAuth(cfg.JWTSecret), middleware.AdminOnly())
+		admin.Use(authRequired, middleware.AdminOnly())
 		{
 			admin.GET("/blog", blogHandler.AdminListPosts)
 			admin.POST("/blog", blogHandler.AdminCreatePost)
@@ -175,6 +193,24 @@ func main() {
 			admin.POST("/nav-links", navLinkHandler.AdminCreate)
 			admin.PUT("/nav-links/:id", navLinkHandler.AdminUpdate)
 			admin.DELETE("/nav-links/:id", navLinkHandler.AdminDelete)
+
+			admin.GET("/users", adminUserHandler.List)
+			admin.POST("/users", adminUserHandler.Create)
+			admin.PUT("/users/:id", adminUserHandler.Update)
+			admin.DELETE("/users/:id", adminUserHandler.Delete)
+
+			admin.GET("/apartments", apartmentHandler.List)
+			admin.POST("/apartments", apartmentHandler.Create)
+			admin.GET("/apartments/:id", apartmentHandler.Get)
+			admin.PUT("/apartments/:id", apartmentHandler.Update)
+			admin.DELETE("/apartments/:id", apartmentHandler.Delete)
+			admin.PUT("/apartments/:id/rating", apartmentHandler.Rate)
+			admin.DELETE("/apartments/:id/rating", apartmentHandler.Unrate)
+
+			admin.GET("/apartment-criteria", apartmentHandler.ListCriteria)
+			admin.POST("/apartment-criteria", apartmentHandler.CreateCriterion)
+			admin.PUT("/apartment-criteria/:id", apartmentHandler.UpdateCriterion)
+			admin.DELETE("/apartment-criteria/:id", apartmentHandler.DeleteCriterion)
 		}
 	}
 
