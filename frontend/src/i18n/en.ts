@@ -1,4 +1,16 @@
 export default {
+  potato: {
+    subtitle: "VPN client for Android",
+    download: "Download APK",
+    arm64: "ARM64 · most phones",
+    other: "Other builds",
+    armv7: "ARMv7 · older devices",
+    universal: "Universal · all architectures",
+    version: "Version",
+    loading: "Checking the latest version…",
+    error: "Release information is currently unavailable.",
+    retry: "Try again",
+  },
   common: {
     save: 'Save',
     saving: 'Saving...',

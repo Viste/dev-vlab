@@ -156,6 +156,7 @@ func main() {
 		api.GET("/nav-links", navLinkHandler.List)
 
 		api.GET("/saturator/version", saturatorHandler.GetVersion)
+		handlers.RegisterPotato(api)
 
 		user := api.Group("/user")
 		user.Use(authRequired)

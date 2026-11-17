@@ -1,6 +1,18 @@
 import type en from './en'
 
 const ru: typeof en = {
+  potato: {
+    subtitle: "VPN-клиент для Android",
+    download: "Скачать APK",
+    arm64: "ARM64 · для большинства телефонов",
+    other: "Другие сборки",
+    armv7: "ARMv7 · старые устройства",
+    universal: "Универсальная · все архитектуры",
+    version: "Версия",
+    loading: "Загружаю информацию о версии…",
+    error: "Пока не удалось загрузить версию.",
+    retry: "Повторить",
+  },
   common: {
     save: 'Сохранить',
     saving: 'Сохраняю...',
